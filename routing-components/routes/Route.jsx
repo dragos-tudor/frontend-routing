@@ -1,5 +1,5 @@
 import { createRouteData, setRouteData, validateRouteData } from "../../routing-routes/mod.js"
-import { throwErrors } from "../../routing/engine/throwing.js"
+import { throwErrors } from "../../support-errors/mod.js"
 
 export const Route = (props, elem) => {
   const routeData = createRouteData(props.path, props.child, props.load, "index" in props)

@@ -3,9 +3,10 @@ import { updateConsumers } from "../../routing-consumers/mod.js"
 import { validateHtmlElement } from "../../routing-html/mod.js"
 import { addToHistory, getHistory } from "../../routing-locations/mod.js"
 import { changeRoute } from "../../routing-routes/mod.js"
+import { throwError } from "../../support-errors/mod.js"
 import { logError, logInfo } from "../../support-loggers/mod.js"
 import { setRoutingData } from "./setting.js"
-import { throwError } from "./throwing.js"
+
 
 const missingRouterError = "Router is missing."
 

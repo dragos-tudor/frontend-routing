@@ -221,12 +221,6 @@ const validateRouteData = (routeData)=>[
         validateRouteDataChild(routeData),
         validateRouteDataLoad(routeData)
     ].filter((error)=>error);
-const setRoutingData = (elem, url)=>{
-    setLocation(elem, url);
-    setRouteParams(elem, {});
-    setSearchParams(elem, resolveSearchParams(url));
-    return elem;
-};
 const throwError = (message)=>{
     if (!message) return false;
     throw new Error(message);
@@ -234,6 +228,12 @@ const throwError = (message)=>{
 const throwErrors = (messages)=>{
     if (!messages.length) return false;
     throw new Error(messages.join(","));
+};
+const setRoutingData = (elem, url)=>{
+    setLocation(elem, url);
+    setRouteParams(elem, {});
+    setSearchParams(elem, resolveSearchParams(url));
+    return elem;
 };
 const missingRouterError = "Router is missing.";
 const navigateFromHistory = async (elem, url)=>{
