@@ -46,6 +46,13 @@ const setEventHandler = (elem, handlerName, handler)=>{
 };
 const isHtmlRouter = (elem)=>getHtmlName(elem) === "router";
 const findRouter = (elem)=>findHtmlAscendant(elem, isHtmlRouter);
+const isLogLibraryEnabled = (elem, libraryName)=>elem.__log.includes(libraryName);
+const isLogMounted = (elem)=>elem.__log instanceof Array;
+const isLogEnabled = (elem, libraryName)=>isLogMounted(elem) && isLogLibraryEnabled(elem, libraryName);
+const LibraryName = "routing";
+const LogHeader = "[routing]";
+const logError = (elem, ...args)=>(isLogEnabled(elem, LibraryName) && console.error(LogHeader, ...args), args[0]);
+const logInfo = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.info(LogHeader, ...args);
 const RootPath = "/";
 const isEmptyPath = (path)=>path == "";
 const isRootPath = (path)=>path === RootPath;
@@ -82,7 +89,7 @@ const isConsumer = (elem)=>elem.__history || elem.__location || elem.__routePara
 const isVisiblePath = (elem)=>findHtmlAscendants(elem, isRoute).every((elem)=>!elem.hidden);
 const findConsumers = (elem)=>findHtmlDescendants(elem, isConsumer);
 const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
-const updateConsumer = (update)=>(elem)=>update(elem)[0];
+const updateConsumer = (update)=>(elem)=>(logInfo(elem, "Update routing consumer: ", getHtmlName(elem)), update(elem)[0]);
 const updateConsumers = (elem, update = getUpdateFunc(elem))=>findConsumers(elem).filter(isVisiblePath).map(updateConsumer(update));
 const addToHistory = (history, url, state = {})=>history?.pushState(state, "", url);
 const getHistory = (elem)=>elem.ownerDocument.__history;
@@ -178,6 +185,7 @@ const findRoute = (elem, urlPart)=>pipe(elem, findDescendantRoute, findSiblingRo
 const toggleRoute = (elem, showElem)=>elem === showElem ? showHtmlElement(showElem) : hideHtmlElement(elem);
 const toggleRoutes = (elems, showElem)=>elems.map((elem)=>toggleRoute(elem, showElem));
 const changeRoute = async (elem, url, routes = [])=>{
+    logInfo(elem, "Route to: ", url);
     const route = findRoute(elem, url);
     if (!existsRoute(route) && isEmptyUrl(url)) return [
         routes
@@ -213,13 +221,6 @@ const validateRouteData = (routeData)=>[
         validateRouteDataChild(routeData),
         validateRouteDataLoad(routeData)
     ].filter((error)=>error);
-const isLogLibraryEnabled = (elem, libraryName)=>elem.__log.includes(libraryName);
-const isLogMounted = (elem)=>elem.__log instanceof Array;
-const isLogEnabled = (elem, libraryName)=>isLogMounted(elem) && isLogLibraryEnabled(elem, libraryName);
-const LibraryName = "routing";
-const LogHeader = "[routing]";
-const logError = (elem, ...args)=>(isLogEnabled(elem, LibraryName) && console.error(LogHeader, ...args), args[0]);
-const logInfo = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.info(LogHeader, ...args);
 const setRoutingData = (elem, url)=>{
     setLocation(elem, url);
     setRouteParams(elem, {});

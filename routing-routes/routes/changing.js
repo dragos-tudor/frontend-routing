@@ -1,5 +1,6 @@
 import { addRouteParams, getRouteParams, getSearchParams, resolveRouteParams } from "../../routing-params/mod.js"
 import { isEmptyUrl, getUrlPath, skipUrlPath, trimUrl} from "../../routing-urls/mod.js"
+import { logInfo } from "../../support-loggers/mod.js";
 import { getRouteChild } from "../route-children/getting.js"
 import { renderRouteChild } from "../route-children/rendering.js"
 import { getRouteData } from "../route-data/getting.js"
@@ -10,6 +11,7 @@ import { existsRoute } from "./verifying.js"
 
 export const changeRoute = async (elem, url, routes = []) =>
 {
+  logInfo(elem, "Route to: ", url)
   const route = findRoute(elem, url)
   if(!existsRoute(route) && isEmptyUrl(url)) return [routes]
   if(!existsRoute(route)) return [, `Route ${url} not found.`]
