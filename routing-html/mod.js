@@ -1,0 +1,6 @@
+export { getHtmlName, getHtmlChildren, getHtmlParentElement } from "./elements/getting.js"
+export { findHtmlAscendant, findHtmlDescendant, findHtmlDescendants } from "./elements/finding.js"
+export { hideHtmlElement } from "./elements/hidding.js"
+export { showHtmlElement } from "./elements/showing.js"
+export { validateHtmlElement } from "./elements/validating.js"
+export { setEventHandler } from "./event-handlers/setting.js"

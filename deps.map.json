@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "/asserts.ts": "https://deno.land/std@0.204.0/assert/mod.ts",
+    "/mock.ts": "https://deno.land/std@0.204.0/testing/mock.ts",
+    "/emit.ts": "https://deno.land/x/emit@0.31.2/mod.ts",
+    "/rendering.js": "https://raw.githubusercontent.com/dragos-tudor/frontend-rendering/main/index.js"
+  }
+}

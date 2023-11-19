@@ -1,0 +1,8 @@
+{
+  "importMap": "./deps.map.json",
+  "tasks": {
+    "bundle": "deno run --allow-all --no-check --unstable ./bundling.js",
+    "run": "deno run --allow-all --no-check",
+    "test": "deno test --allow-all --no-check --unstable  --parallel"
+  }
+}
