@@ -1,13 +1,8 @@
 import { addRouteParams, getRouteParams, getSearchParams, resolveRouteParams } from "../../routing-params/mod.js"
+import { getRouteChild, getRouteData, existsRoute, findRoute, findSiblingRoutes, renderRouteChild, toggleRoutes } from "../../routing-routes/mod.js"
 import { isEmptyUrl, getUrlPath, skipUrlPath, trimUrl} from "../../routing-urls/mod.js"
-import { logInfo } from "../../support-loggers/mod.js";
-import { getRouteChild } from "../route-children/getting.js"
-import { renderRouteChild } from "../route-children/rendering.js"
-import { getRouteData } from "../route-data/getting.js"
-import { findSiblingRoutes } from "../route-siblings/finding.js"
-import { findRoute } from "./finding.js"
-import { toggleRoutes } from "./toggling.js"
-import { existsRoute } from "./verifying.js"
+import { logInfo } from "../../support-loggers/mod.js"
+
 
 export const changeRoute = async (elem, url, routes = []) =>
 {

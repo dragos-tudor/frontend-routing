@@ -100,6 +100,14 @@ const getHistoryPolyfill = (hrefs = [])=>Object.freeze({
 const setHistory = (elem)=>elem.ownerDocument.__history = globalThis.history ?? getHistoryPolyfill();
 const getDefaultLocation = (url)=>new URL("http://localhost" + url);
 const setLocation = (elem, url)=>elem.ownerDocument.__location = globalThis.location ?? getDefaultLocation(url);
+const throwError = (message)=>{
+    if (!message) return false;
+    throw new Error(message);
+};
+const throwErrors = (messages)=>{
+    if (!messages.length) return false;
+    throw new Error(messages.join(","));
+};
 const addRouteParams = (params, newParams)=>params && Object.assign(params, newParams);
 const getRouteParams = (elem)=>elem.ownerDocument.__routeParams;
 const splitPath1 = (path, delimiter = "/")=>path?.split(delimiter);
@@ -169,6 +177,12 @@ const resolveSearchParams = (url)=>{
     if (!searchParams.size) return undefined;
     return searchParams.entries().reduce(setSearchParam, {});
 };
+const createRouteData = (path, child, loadChild, index = false)=>Object.freeze({
+        path,
+        child,
+        loadChild,
+        index
+    });
 const getRouteChild = (elem)=>elem.children[0];
 const existsRouteDataPath = (routeData)=>routeData.path;
 const existsRouteDataLoadChild = (routeData)=>typeof routeData.loadChild === "function";
@@ -176,6 +190,15 @@ const isRouteDataLoadFunction = (routeData)=>!routeData.loadChild || typeof rout
 const isRouteDataChildObject = (routeData)=>!routeData.child || typeof routeData.child === "object";
 const getRenderFunc = (elem)=>elem?.ownerDocument?.__render;
 const renderRouteChild = async (elem, routeData, routeParams, searchParams, render = getRenderFunc(elem))=>existsRouteDataLoadChild(routeData) ? render(await routeData.loadChild(routeParams, searchParams), elem)[0] : render(routeData.child, elem)[0];
+const setRouteData = (elem, routeData)=>elem.__routeData = routeData;
+const validateRouteDataChild = (routeData)=>isRouteDataChildObject(routeData) ? "" : "Route child should be jsx element.";
+const validateRouteDataLoad = (routeData)=>isRouteDataLoadFunction(routeData) ? "" : "Route load should be function.";
+const validateRouteDataPath = (routeData)=>existsRouteDataPath(routeData) ? "" : "Route path is missing.";
+const validateRouteData = (routeData)=>[
+        validateRouteDataPath(routeData),
+        validateRouteDataChild(routeData),
+        validateRouteDataLoad(routeData)
+    ].filter((error)=>error);
 const findIndexRoute = (elems)=>elems.find((elem)=>getRouteData(elem).index);
 const findSiblingRoute = (urlPart)=>(elems)=>!isEmptyUrl(urlPart) ? elems.find(isMatchedRoute(urlPart)) : findIndexRoute(elems);
 const findSiblingRoutes = (elem)=>getHtmlChildren(getHtmlParentElement(elem)).filter(isRoute);
@@ -205,29 +228,6 @@ const changeRoute = async (elem, url, routes = [])=>{
         ...routes,
         route
     ]);
-};
-const createRouteData = (path, child, loadChild, index = false)=>Object.freeze({
-        path,
-        child,
-        loadChild,
-        index
-    });
-const setRouteData = (elem, routeData)=>elem.__routeData = routeData;
-const validateRouteDataChild = (routeData)=>isRouteDataChildObject(routeData) ? "" : "Route child should be jsx element.";
-const validateRouteDataLoad = (routeData)=>isRouteDataLoadFunction(routeData) ? "" : "Route load should be function.";
-const validateRouteDataPath = (routeData)=>existsRouteDataPath(routeData) ? "" : "Route path is missing.";
-const validateRouteData = (routeData)=>[
-        validateRouteDataPath(routeData),
-        validateRouteDataChild(routeData),
-        validateRouteDataLoad(routeData)
-    ].filter((error)=>error);
-const throwError = (message)=>{
-    if (!message) return false;
-    throw new Error(message);
-};
-const throwErrors = (messages)=>{
-    if (!messages.length) return false;
-    throw new Error(messages.join(","));
 };
 const setRoutingData = (elem, url)=>{
     setLocation(elem, url);

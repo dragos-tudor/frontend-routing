@@ -2,9 +2,9 @@ import { findRouter } from "../../routing-components/routers/finding.js"
 import { updateConsumers } from "../../routing-consumers/mod.js"
 import { validateHtmlElement } from "../../routing-html/mod.js"
 import { addToHistory, getHistory } from "../../routing-locations/mod.js"
-import { changeRoute } from "../../routing-routes/mod.js"
 import { throwError } from "../../support-errors/mod.js"
 import { logError, logInfo } from "../../support-loggers/mod.js"
+import { changeRoute } from "./changing.js"
 import { setRoutingData } from "./setting.js"
 
 

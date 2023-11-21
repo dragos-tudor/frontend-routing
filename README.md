@@ -4,24 +4,21 @@
 - simplified React-Routing library version.
 
 ### Modules
-- high-levels: routing, routing-components, routing-consumers.
-- low-levels: routing-html, routing-locations, routing-params, routing-urls.
+- high-levels: routing, routing-components.
+- low-levels: routing-consumers, routing-html, routing-locations, routing-params, routing-routes, routing-urls.
 
 ### [Routing module](./routing/)
-- main functionality: navigate from history or user.
+- main functionality: navigate from history or user and change routes.
 - `navigateFromUser`:
-  - for current element find router.
-  - store location, search params, history (skipped by `navigateFromHistory`).
-  - change routes starting from router.
+  - for current element find (ascending) router.
+  - store location, search params, history [skipped by `navigateFromHistory`].
+  - change routes starting from router [`changeRoutes`].
   - update **current path** routing consumers starting from router.
-
-### [Routes module](./routing-routes/)
-- main functionality: implement route behaviour.
 - `changeRoutes`:
   - find matching route for url.
   - store route params.
-  - show maching route, hide sibling routes.
-  - first time showing route static or dynamic load child.
+  - show mached route, hide sibling routes.
+  - show route static child (jsx factory) or dynamic loaded child.
   - remove route path from url.
   - change descendant routes with remaining url.
 
@@ -32,3 +29,13 @@
   - register `navigate` event handler `navigateFromUser`.
 - `Route`: set static (jsx factory) or dynamic loading function.
 - `NavLink`: on click raise `navigate` event.
+
+### [Routes module](./routing-routes/)
+- main functionality: implement route behaviour.
+  - find, toogle routes.
+  - render routes children.
+  - find route siblings.
+  - manage routes data.
+
+### [Consumers module](./routing-consumers/)
+- main functionality: update routing consumers.
