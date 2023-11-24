@@ -1,12 +1,11 @@
 import { getEventName } from "../events/getting.js"
-import { storeEventHandler } from "./storing.js"
+
+const addEventListener = (elem, handlerName, handler) => elem[handlerName] = handler
+
+const removeEventListener = (elem, handlerName) => elem.removeEventListener(getEventName(handlerName), elem[handlerName])
 
 export const setEventHandler = (elem, handlerName, handler) => {
-  const eventName = getEventName(handlerName)
-
-  elem.removeEventListener(eventName, elem[handlerName])
-  elem.addEventListener(eventName, handler)
-
-  storeEventHandler(elem, handlerName, handler)
+  removeEventListener(elem, handlerName)
+  addEventListener(elem, handlerName, handler)
   return elem
 }
