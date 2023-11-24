@@ -5,7 +5,7 @@ import { setPopStateHandler, setNavigateHandler } from "./setting.js"
 export const Router = (props, elem) => {
   setHistory(elem)
 
-  setPopStateHandler(elem, navigateFromHistory)
+  setPopStateHandler(window, navigateFromHistory)
   setNavigateHandler(elem, navigateFromUser)
 
   return props.children
