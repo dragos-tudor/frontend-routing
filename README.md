@@ -1,36 +1,40 @@
 ## Frontend routing library
+- simplified React-Router like library.
 - Deno-based routing library [Node-free].
 - functional-style library [OOP-free].
-- simplified React-Routing like library.
 
 ### Usage
 ```javascript
-
 import {render} from "/scripts/rendering.js"
-import {Router, Route, NavLink} from "/scripts/routing.js"
+import {Router, Route, NavLink, navigate} from "/scripts/routing.js"
 
-export const App = (props, elem) => {
-  const loadOffers = async () => {
-    const {Offers} = await import("/offers.js");
-    return <Offers></Offers>;
-  }
+const loadSpecialOffer = async () => {
+    const {SpecialOffer} = await import("/components/special-offer.jsx");
+    return <SpecialOffer></SpecialOffer>;
+}
+
+const Home = () => <div>{"home"}</div>
+const Contact = () => <div>{"contact"}</div>
+
+export const App = () => {
   return (
-    <Router>
+    <Router __log={["routing"]}>
       <nav>
-        <NavLink href="/">Home</NavLink>
-        <NavLink href="/contact">Contact</NavLink>
-        <NavLink href="/offers">Offers</NavLink>
+        <NavLink href="/home">{"Home"}</NavLink>
+        <NavLink href="/contact">{"Contact"}</NavLink>
+        <NavLink href="/special-offer">{"Special offer"}</NavLink>
       </nav>
       <main>
-        <Route path="/" child={<Home></Home>}></Route>
+        <Route path="/home" child={<Home></Home>} index></Route>
         <Route path="/contact" child={<Contact></Contact>}></Route>
-        <Route path="/offers" load={loadOffers}></Route>
+        <Route path="/special-offer" load={loadSpecialOffer}></Route>
       </main>
     </Router>
   )
 }
 
 render(<App></App>, document.body)
+navigate(document.querySelector("router"), "/")
 ```
 
 ### Modules
