@@ -36,12 +36,11 @@ const showHtmlElement = (elem)=>elem.removeAttribute("hidden");
 const isHtmlElement = (elem)=>elem.nodeType === 1;
 const validateHtmlElement = (elem)=>isHtmlElement(elem) ? "" : "Element type should be HTML element.";
 const getEventName = (handlerName)=>handlerName.replace("on", "");
-const storeEventHandler = (elem, handlerName, handler)=>elem[handlerName] = handler;
+const addEventListener = (elem, handlerName, handler)=>elem[handlerName] = handler;
+const removeEventListener = (elem, handlerName)=>elem.removeEventListener(getEventName(handlerName), elem[handlerName]);
 const setEventHandler = (elem, handlerName, handler)=>{
-    const eventName = getEventName(handlerName);
-    elem.removeEventListener(eventName, elem[handlerName]);
-    elem.addEventListener(eventName, handler);
-    storeEventHandler(elem, handlerName, handler);
+    removeEventListener(elem, handlerName);
+    addEventListener(elem, handlerName, handler);
     return elem;
 };
 const isHtmlRouter = (elem)=>getHtmlName(elem) === "router";
@@ -51,36 +50,40 @@ const isLogMounted = (elem)=>elem.__log instanceof Array;
 const isLogEnabled = (elem, libraryName)=>isLogMounted(elem) && isLogLibraryEnabled(elem, libraryName);
 const LibraryName = "routing";
 const LogHeader = "[routing]";
-const logError = (elem, ...args)=>(isLogEnabled(elem, LibraryName) && console.error(LogHeader, ...args), args[0]);
+const logError = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.error(LogHeader, ...args);
 const logInfo = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.info(LogHeader, ...args);
 const RootPath = "/";
-const isEmptyPath = (path)=>path == "";
+const PathDelimiter = "/";
+const isEmptyPath = (path)=>path === "";
+const isEndPathDelimiter = (path)=>path.endsWith(PathDelimiter);
+const isRegExpPath = (path)=>path instanceof RegExp;
 const isRootPath = (path)=>path === RootPath;
 const isPathParam = (path)=>path.startsWith(":") || path.includes("/:");
-const PathDelimiter = "/";
-const splitPath = (path, delimiter = PathDelimiter)=>path.split(delimiter);
+const trimEndPath = (path)=>{
+    if (isEmptyPath(path)) return path;
+    if (isRootPath(path)) return path;
+    if (isEndPathDelimiter(path)) return path.substr(0, path.length - 1);
+    return path;
+};
+const splitPath = (path)=>path.split(PathDelimiter);
 const getUrlPath = (url, path)=>{
     if (isRootPath(path)) return RootPath;
-    const pathParts = splitPath(path, PathDelimiter);
-    const urlParts = splitPath(url, PathDelimiter);
-    return pathParts.map((pathPart, index)=>pathPart && urlParts[index]).join(PathDelimiter);
+    if (isRegExpPath(path)) return url.match(path).join(PathDelimiter);
+    const pathParts = splitPath(trimEndPath(path), PathDelimiter);
+    const urlParts = splitPath(trimEndPath(url), PathDelimiter);
+    return pathParts.map((_, index)=>urlParts[index]).join(PathDelimiter);
 };
+const getUrlPathName = (url)=>url.startsWith("http") ? new URL(url).pathname : url;
 const skipUrlPath = (url, urlPath)=>url.replace(urlPath, "");
 const toLowerCasePath = (path)=>path?.toLowerCase();
 const matchPaths = (path1, path2)=>isPathParam(path2) ? true : toLowerCasePath(path1) === toLowerCasePath(path2);
+const matchUrlPathPart = (urlParts)=>(pathPart, index)=>matchPaths(urlParts[index], pathPart);
 const matchUrlPath = (url, path)=>{
+    if (isRegExpPath(path)) return path.test(url);
     const urlParts = splitPath(url);
     const pathParts = splitPath(path);
-    return url.match(path) != null || pathParts.every((pathPart, index)=>isEmptyPath(pathPart) || matchPaths(urlParts[index], pathPart));
+    return pathParts.every(matchUrlPathPart(urlParts));
 };
-const trimUrl = (url, __char = PathDelimiter)=>{
-    if (!url.length) return url;
-    if (url.startsWith(__char) && url.endsWith(__char)) return url.substr(1, url.length - 1);
-    if (url.startsWith(__char)) return url.substr(1);
-    if (url.endsWith(__char)) return url.substr(0, url.length - 1);
-    return url;
-};
-const isEmptyUrl = (url)=>!url;
 const getRouteData = (elem)=>elem.__routeData;
 const existsRoute = (elem)=>elem;
 const isMatchedRoute = (urlPart)=>(elem)=>matchUrlPath(urlPart, getRouteData(elem).path);
@@ -158,13 +161,13 @@ const setRouteParams = (elem, params)=>elem.ownerDocument.__routeParams = params
 const RouteParamPrefix = ":";
 const isRouteParam = (routePart)=>routePart.startsWith(RouteParamPrefix) || routePart.startsWith("/" + RouteParamPrefix);
 const resolveRouteParams = (url, path = "")=>{
+    if (path instanceof RegExp) return {};
     const urlParts = splitPath1(url);
     const routeParts = splitPath1(path);
-    const getIndex = (_, index)=>index;
-    return routeParts.map(getIndex).filter((index)=>isRouteParam(routeParts[index])).map((index)=>[
-            routeParts[index],
+    return routeParts.map((routePart, index)=>isRouteParam(routePart) && [
+            routePart,
             urlParts[index]
-        ]).reduce(setRouteParam, {});
+        ]).filter((part)=>part).reduce(setRouteParam, {});
 };
 const QueryDelimiter = "?";
 const getQueryString = (url, delimiter = QueryDelimiter)=>splitPath1(url, delimiter)[1];
@@ -200,7 +203,7 @@ const validateRouteData = (routeData)=>[
         validateRouteDataLoad(routeData)
     ].filter((error)=>error);
 const findIndexRoute = (elems)=>elems.find((elem)=>getRouteData(elem).index);
-const findSiblingRoute = (urlPart)=>(elems)=>!isEmptyUrl(urlPart) ? elems.find(isMatchedRoute(urlPart)) : findIndexRoute(elems);
+const findSiblingRoute = (urlPart)=>(elems)=>elems.find(isMatchedRoute(urlPart)) || findIndexRoute(elems);
 const findSiblingRoutes = (elem)=>getHtmlChildren(getHtmlParentElement(elem)).filter(isRoute);
 const pipe = (firstArg, ...funcs)=>funcs.reduce((arg, func)=>arg != undefined ? func(arg) : arg, firstArg);
 const findDescendantRoute = (elem)=>findHtmlDescendant(elem, isRoute);
@@ -208,22 +211,22 @@ const findRoute = (elem, urlPart)=>pipe(elem, findDescendantRoute, findSiblingRo
 const toggleRoute = (elem, showElem)=>elem === showElem ? showHtmlElement(showElem) : hideHtmlElement(elem);
 const toggleRoutes = (elems, showElem)=>elems.map((elem)=>toggleRoute(elem, showElem));
 const changeRoute = async (elem, url, routes = [])=>{
-    logInfo(elem, "Route to: ", url);
     const route = findRoute(elem, url);
-    if (!existsRoute(route) && isEmptyUrl(url)) return [
+    if (!existsRoute(route) && isEmptyPath(url)) return [
         routes
     ];
     if (!existsRoute(route)) return [
         ,
         `Route ${url} not found.`
     ];
+    logInfo(elem, "Route to: ", url);
     const routeData = getRouteData(route);
     const routeParams = resolveRouteParams(url, routeData.path);
     addRouteParams(getRouteParams(route), routeParams);
     const routeChild = getRouteChild(route) || await renderRouteChild(route, routeData, getRouteParams(route), getSearchParams(route));
     toggleRoutes(findSiblingRoutes(route), route);
     const urlPath = getUrlPath(url, routeData.path);
-    const nextUrl = trimUrl(skipUrlPath(url, urlPath));
+    const nextUrl = skipUrlPath(url, urlPath);
     return changeRoute(routeChild, nextUrl, [
         ...routes,
         route
@@ -236,14 +239,16 @@ const setRoutingData = (elem, url)=>{
     return elem;
 };
 const missingRouterError = "Router is missing.";
+const navigationError = "Navigation error: ";
+const navigateTo = "Navigate to:";
 const navigateFromHistory = async (elem, url)=>{
-    logInfo(elem, "Navigate to:", url);
+    logInfo(elem, navigateTo, url);
     throwError(validateHtmlElement(elem));
     const router = findRouter(elem);
-    if (!router) return logError(elem, missingRouterError);
+    if (!router) return logError(elem, missingRouterError), missingRouterError;
     setRoutingData(router, url);
-    const [routes, changeRouteError] = await changeRoute(router, url);
-    if (changeRouteError) return logError(router, `Navigation error: ${changeRouteError}`);
+    const [routes, changeRouteError] = await changeRoute(router, getUrlPathName(url));
+    if (changeRouteError) return logError(router, navigationError, changeRouteError), navigationError + changeRouteError;
     const consumers = updateConsumers(router);
     return [
         routes,
@@ -254,11 +259,11 @@ const navigateFromUser = (elem, url)=>{
     addToHistory(getHistory(elem), url);
     return navigateFromHistory(elem, url);
 };
-const setPopStateHandler = (elem, navigate)=>setEventHandler(elem, "onpopstate", (event)=>navigate(event.target, event.target.location.href, true));
+const setPopStateHandler = (window1, navigate)=>setEventHandler(window1, "onpopstate", ()=>navigate(findHtmlDescendant(window1.document.body, isHtmlRouter), window1.location.href, true));
 const setNavigateHandler = (elem, navigate)=>setEventHandler(elem, "onclick", (event)=>event.isNavigate && navigate(event.target, event.target.href));
 const Router = (props, elem)=>{
     setHistory(elem);
-    setPopStateHandler(elem, navigateFromHistory);
+    setPopStateHandler(window, navigateFromHistory);
     setNavigateHandler(elem, navigateFromUser);
     return props.children;
 };

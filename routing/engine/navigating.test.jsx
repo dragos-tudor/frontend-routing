@@ -17,13 +17,25 @@ Deno.test("navigate app => navigate to url", async (t) => {
   })
 
   await t.step("nested routes => navigate to url => rendered nested routes", async () => {
-    const A = () => <Route path="b" child={<b></b>}></Route>
-    const elem = render(<Router><Route path="/" child={<A></A>}></Route></Router>)
+    const A = () => <Route path="/b" child={<b></b>}></Route>
+    const elem = render(<Router><Route path="/a" child={<A></A>} index></Route></Router>)
 
-    await navigateFromUser(elem, "/b")
+    await navigateFromUser(elem, "/a/b")
 
     assertExists(elem.querySelector("router a"))
     assertExists(elem.querySelector("router a route b"))
+  })
+
+  await t.step("index route => navigate to url => rendered index route", async () => {
+    const A = () => <></>
+    const elem = render(<Router>
+      <Route path="/a" child={<A></A>} index></Route>
+      <Route path="/b" child={<b></b>}></Route>
+    </Router>)
+
+    await navigateFromUser(elem, "/")
+
+    assertExists(elem.querySelector("router a"))
   })
 
   await t.step("routing consumers => navigate to url => updated consumers", async () => {
@@ -44,7 +56,7 @@ Deno.test("navigate app => navigate to url", async (t) => {
   })
 
   await t.step("root route => navigate to url => rendered nested routes", async () => {
-    const A = () => <Route path="b" child={<b></b>}></Route>
+    const A = () => <Route path="/b" child={<b></b>}></Route>
     const elem = render(<Router><Route path="/a" child={<A></A>}></Route></Router>)
 
     await navigateFromUser(elem, "/a")
@@ -56,34 +68,34 @@ Deno.test("navigate app => navigate to url", async (t) => {
   })
 
   await t.step("old route => navigate to url => rendered new route", async () => {
-    const A = () => <><Route path="b" child={<b></b>}></Route><Route path="c" child={<c></c>}></Route></>
-    const elem = render(<Router><Route path="/" child={<A></A>}></Route></Router>)
+    const A = () => <><Route path="/b" child={<b></b>}></Route><Route path="/c" child={<c></c>}></Route></>
+    const elem = render(<Router><Route path="/a" child={<A></A>} index></Route></Router>)
 
-    await navigateFromUser(elem, "/b")
+    await navigateFromUser(elem, "http://localhost/a/b")
     assertEquals(elem.querySelector("route c"), null)
 
-    await navigateFromUser(elem, "/c")
+    await navigateFromUser(elem, "http://localhost/a/c")
     assertExists(elem.querySelector("route c"))
   })
 
   await t.step("fallback route => navigate to wrong url => rendered fallback route", async () => {
-    const elem = render(<Router><Route path="a" child={<a></a>}></Route><Route path=".*" child={<b></b>}></Route></Router>)
+    const elem = render(<Router><Route path="/a" child={<a></a>}></Route><Route path={/\/.*/} child={<b></b>}></Route></Router>)
 
-    await navigateFromUser(elem, "x")
+    await navigateFromUser(elem, "/x")
     assertExists(elem.querySelector("route b"))
   })
 
   await t.step("no fallback route => navigate to wrong url => route not found error", async () => {
-    const elem = render(<Router><Route path="a" element={<a></a>}></Route></Router>)
+    const elem = render(<Router><Route path="/a" element={<a></a>}></Route></Router>)
 
-    const error = await navigateFromUser(elem, "b")
-    assertEquals(error, "Navigation error: Route b not found.")
+    const error = await navigateFromUser(elem, "/b")
+    assertEquals(error, "Navigation error: Route /b not found.")
   })
 
   await t.step("router => click navigate link => rendered routes with link href", async () => {
-    const elem = render(<Router><NavLink href="c"></NavLink><Route path="b" child={<b></b>}></Route><Route path="c" child={<c></c>}></Route></Router>)
+    const elem = render(<Router><NavLink href="/c"></NavLink><Route path="/b" child={<b></b>}></Route><Route path="/c" child={<c></c>}></Route></Router>)
 
-    await navigateFromUser(elem, "b")
+    await navigateFromUser(elem, "/b")
     assertEquals(elem.querySelector("c"), null)
 
     dispatchEvent(elem.querySelector("navlink a"), "click")
