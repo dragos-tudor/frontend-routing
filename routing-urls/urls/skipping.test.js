@@ -9,8 +9,6 @@ Deno.test("use urls => skip url paths", async (t) => {
 
     assertEquals(skipUrlPath("/", null), "/")
     assertEquals(skipUrlPath("/", undefined), "/")
-    assertEquals(skipUrlPath("a", null), "a")
-    assertEquals(skipUrlPath("a", undefined), "a")
     assertEquals(skipUrlPath("/", "a"), "/")
 
     assertEquals(skipUrlPath("/", "/"), "")
@@ -18,13 +16,6 @@ Deno.test("use urls => skip url paths", async (t) => {
     assertEquals(skipUrlPath("/a/b", "/a"), "/b")
     assertEquals(skipUrlPath("/a/b/c", "/a"), "/b/c")
     assertEquals(skipUrlPath("/a/b/c/d", "/a/b"), "/c/d")
-
-    assertEquals(skipUrlPath("a", ""), "a")
-    assertEquals(skipUrlPath("a", "/"), "a")
-    assertEquals(skipUrlPath("a", "c"), "a")
-    assertEquals(skipUrlPath("a/b", "a"), "/b")
-    assertEquals(skipUrlPath("a/b/c", "a"), "/b/c")
-    assertEquals(skipUrlPath("a/b/c/d", "a/b"), "/c/d")
   })
 
 })

@@ -1,3 +1,3 @@
 import { PathDelimiter } from "./PathDelimiter.js"
 
-export const splitPath = (path, delimiter = PathDelimiter) => path.split(delimiter)
+export const splitPath = (path) => path.split(PathDelimiter)
