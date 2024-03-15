@@ -1,2 +1,2 @@
 
-export const showHtmlElement = (elem) => elem.removeAttribute("hidden")
+export const showHtmlElement = (elem) => (elem.style.display = "display", elem)

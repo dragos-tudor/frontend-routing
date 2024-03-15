@@ -3,4 +3,5 @@ export { findHtmlAscendant, findHtmlDescendant, findHtmlDescendants } from "./el
 export { hideHtmlElement } from "./elements/hidding.js"
 export { showHtmlElement } from "./elements/showing.js"
 export { validateHtmlElement } from "./elements/validating.js"
+export { isDisplayedHtmlElement } from "./elements/verifying.js"
 export { setEventHandler } from "./event-handlers/setting.js"

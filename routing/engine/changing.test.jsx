@@ -4,6 +4,7 @@ import { spy, assertSpyCallArgs} from "/mock.ts"
 import { setRouteParams, getRouteParams, resolveSearchParams, setSearchParams } from "../../routing-params/mod.js"
 import { createRouteData } from "../../routing-routes/mod.js"
 import { changeRoute } from "./changing.js"
+import { hideHtmlElement, isDisplayedHtmlElement } from "../../routing-html/mod.js";
 
 
 Deno.test("use routes => change routes", async (t) => {
@@ -16,18 +17,20 @@ Deno.test("use routes => change routes", async (t) => {
   })
 
   await t.step("hidden route => change route => shown route", async () => {
-    const elem = render(<route hidden __routeData={createRouteData("/a", <a></a> )}></route>)
+    const elem = render(<route __routeData={createRouteData("/a", <a></a> )}></route>)
+    hideHtmlElement(elem)
     const actual = await changeRoute(elem, "/a")
 
-    assertEquals(elem.hidden, false)
+    assertEquals(isDisplayedHtmlElement(elem), true)
   })
 
   await t.step("fallback route => change route => shown fallback route", async () => {
-    const elem = render(<a><route __routeData={createRouteData("/b", <b></b> )}></route><route class="c" hidden __routeData={createRouteData(/\/.*/, <c></c> )}></route></a>)
+    const elem = render(<a><route __routeData={createRouteData("/b", <b></b> )}></route><route class="c" __routeData={createRouteData(/\/.*/, <c></c> )}></route></a>)
+    hideHtmlElement(elem.querySelector(".c"))
     const actual = await changeRoute(elem, "/x")
 
     assertExists(elem.querySelector("route c"))
-    assertEquals(elem.querySelector(".c").hidden, false)
+    assertEquals(isDisplayedHtmlElement(elem.querySelector(".c")), true)
   })
 
   await t.step("nested routes => change route => rendered nested routes", async () => {
@@ -75,13 +78,13 @@ Deno.test("use routes => change routes", async (t) => {
       <route __routeData={createRouteData("/a",
         <a>
           <route class="b" __routeData={createRouteData("/b", <b></b>)}></route>
-          <route class="c" hidden __routeData={createRouteData("/c", <c></c>)}></route>
+          <route class="c" __routeData={createRouteData("/c", <c></c>)}></route>
         </a> )}>
       </route>)
     await changeRoute(elem, "/a/c")
 
-    assertEquals(elem.querySelector(".b").hidden, true)
-    assertEquals(elem.querySelector(".c").hidden, false)
+    assertEquals(isDisplayedHtmlElement(elem.querySelector(".b")), false)
+    assertEquals(isDisplayedHtmlElement(elem.querySelector(".c")), true)
   })
 
   await t.step("route params => change route => stored route params", async () => {
