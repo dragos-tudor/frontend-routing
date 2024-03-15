@@ -32,7 +32,7 @@ const findHtmlDescendants = (elem, func, elems = [])=>{
     return elems;
 };
 const hideHtmlElement = (elem)=>(elem.style.display = "none", elem);
-const showHtmlElement = (elem)=>(elem.style.display = "display", elem);
+const showHtmlElement = (elem)=>(elem.style.display = "block", elem);
 const isHtmlElement = (elem)=>elem.nodeType === 1;
 const validateHtmlElement = (elem)=>isHtmlElement(elem) ? "" : "Element type should be HTML element.";
 const getEventName = (handlerName)=>handlerName.replace("on", "");

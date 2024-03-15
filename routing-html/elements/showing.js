@@ -1,2 +1,2 @@
 
-export const showHtmlElement = (elem) => (elem.style.display = "display", elem)
+export const showHtmlElement = (elem) => (elem.style.display = "block", elem)
