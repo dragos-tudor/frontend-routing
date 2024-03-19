@@ -127,6 +127,11 @@ Deno.test("use routes => change routes", async (t) => {
     assertEquals((await changeRoute(render(<route __routeData={createRouteData("/a", <></>)}></route>), "/a/b"))[1], "Route /b not found.")
   })
 
+  await t.step("not allowed routes => chang eroute => route not allowed error", async () => {
+    assertEquals((await changeRoute(render(<route __routeData={createRouteData("/", <></>, undefined, false)}></route>), "/"))[1], "Route not allowed.")
+    // assertEquals((await changeRoute(render(<route __routeData={createRouteData("/a", <></>, undefined, false)}></route>), "/a"))[1], "Route not allowed.")
+  })
+
 })
 
-const createIndexRoute = (path, child) => createRouteData(path, child, undefined, true)
+const createIndexRoute = (path, child) => createRouteData(path, child, undefined, undefined, true)

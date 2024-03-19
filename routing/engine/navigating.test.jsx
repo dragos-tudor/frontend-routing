@@ -2,9 +2,7 @@ import { assertEquals, assertExists } from "/asserts.ts"
 import { render, dispatchEvent } from "/rendering.js"
 import { getHistory } from "../../routing-locations/mod.js"
 import { useRouteParams } from "../../routing-params/mod.js"
-import { NavLink } from "../../routing-components/navlinks/NavLink.jsx"
-import { Route } from "../../routing-components/routes/Route.jsx"
-import { Router } from "../../routing-components/routers/Router.js"
+import { NavLink, Route, Router } from "../../routing-components/mod.js"
 import { navigateFromUser } from "./navigating.js"
 
 Deno.test("navigate app => navigate to url", async (t) => {
@@ -93,7 +91,11 @@ Deno.test("navigate app => navigate to url", async (t) => {
   })
 
   await t.step("router => click navigate link => rendered routes with link href", async () => {
-    const elem = render(<Router><NavLink href="/c"></NavLink><Route path="/b" child={<b></b>}></Route><Route path="/c" child={<c></c>}></Route></Router>)
+    const elem = render(<Router>
+      <NavLink href="/c"></NavLink>
+      <Route path="/b" child={<b></b>}></Route>
+      <Route path="/c" child={<c></c>}></Route>
+    </Router>)
 
     await navigateFromUser(elem, "/b")
     assertEquals(elem.querySelector("c"), null)
@@ -102,6 +104,16 @@ Deno.test("navigate app => navigate to url", async (t) => {
     await Promise.resolve()
 
     assertExists(elem.querySelector("route c"))
+  })
+
+  await t.step("not allowed route => navigate to url => router redirect to new route", async () => {
+    const elem = render(<Router reroute={(router, url) => navigateFromUser(router, "/b?returnUrl=" + url)}>
+      <Route path="/a" child={<a></a>} allow={false}></Route>
+      <Route path="/b" child={<b></b>}></Route>
+    </Router>)
+
+    await navigateFromUser(elem, "/a")
+    assertExists(elem.querySelector("route b"))
   })
 
 })

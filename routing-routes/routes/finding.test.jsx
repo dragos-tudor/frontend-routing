@@ -32,4 +32,4 @@ Deno.test("use routes => find route", async (t) => {
 
 })
 
-const createIndexRoute = (path) => createRouteData(path, undefined, undefined, true)
+const createIndexRoute = (path) => createRouteData(path, undefined, undefined, undefined, true)

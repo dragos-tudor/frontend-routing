@@ -45,6 +45,7 @@ const setEventHandler = (elem, handlerName, handler)=>{
 };
 const isHtmlRouter = (elem)=>getHtmlName(elem) === "router";
 const findRouter = (elem)=>findHtmlAscendant(elem, isHtmlRouter);
+const getRouterReroute = (elem)=>elem.__reroute;
 const isLogLibraryEnabled = (elem, libraryName)=>elem.__log.includes(libraryName);
 const isLogMounted = (elem)=>elem.__log instanceof Array;
 const isLogEnabled = (elem, libraryName)=>isLogMounted(elem) && isLogLibraryEnabled(elem, libraryName);
@@ -86,10 +87,16 @@ const matchUrlPath = (url, path)=>{
 };
 const getRouteData = (elem)=>elem.__routeData;
 const existsRoute = (elem)=>elem;
+const isAllowedRoute = (elem)=>{
+    const routeData = getRouteData(elem);
+    if (typeof routeData.allow === "function") return routeData.allow();
+    if (typeof routeData.allow === "boolean") return routeData.allow;
+    return true;
+};
 const isMatchedRoute = (urlPart)=>(elem)=>matchUrlPath(urlPart, getRouteData(elem).path);
-const isRoute = (elem)=>getHtmlName(elem) === "route";
+const isRouteElement = (elem)=>getHtmlName(elem) === "route";
 const isConsumer = (elem)=>elem.__history || elem.__location || elem.__routeParams || elem.__searchParams;
-const isVisiblePath = (elem)=>findHtmlAscendants(elem, isRoute).every((elem)=>!elem.hidden);
+const isVisiblePath = (elem)=>findHtmlAscendants(elem, isRouteElement).every((elem)=>!elem.hidden);
 const findConsumers = (elem)=>findHtmlDescendants(elem, isConsumer);
 const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
 const updateConsumer = (update)=>(elem)=>(logInfo(elem, "Update routing consumer: ", getHtmlName(elem)), update(elem)[0]);
@@ -103,14 +110,6 @@ const getHistoryPolyfill = (hrefs = [])=>Object.freeze({
 const setHistory = (elem)=>elem.ownerDocument.__history = globalThis.history ?? getHistoryPolyfill();
 const getDefaultLocation = (url)=>new URL("http://localhost" + url);
 const setLocation = (elem, url)=>elem.ownerDocument.__location = globalThis.location ?? getDefaultLocation(url);
-const throwError = (message)=>{
-    if (!message) return false;
-    throw new Error(message);
-};
-const throwErrors = (messages)=>{
-    if (!messages.length) return false;
-    throw new Error(messages.join(","));
-};
 const addRouteParams = (params, newParams)=>params && Object.assign(params, newParams);
 const getRouteParams = (elem)=>elem.ownerDocument.__routeParams;
 const splitPath1 = (path, delimiter = "/")=>path?.split(delimiter);
@@ -180,10 +179,22 @@ const resolveSearchParams = (url)=>{
     if (!searchParams.size) return undefined;
     return searchParams.entries().reduce(setSearchParam, {});
 };
-const createRouteData = (path, child, loadChild, index = false)=>Object.freeze({
+const skipQueryString = (url, delimiter = QueryDelimiter)=>url.split(delimiter)[0];
+const throwError = (message)=>{
+    if (!message) return false;
+    throw new Error(message);
+};
+const throwErrors = (messages)=>{
+    if (!messages.length) return false;
+    throw new Error(messages.join(","));
+};
+const routeNotFound = "Route #url not found.";
+const routeNotAllowed = "Route not allowed.";
+const createRouteData = (path, child, loadChild, allow, index = false)=>Object.freeze({
         path,
         child,
         loadChild,
+        allow,
         index
     });
 const getRouteChild = (elem)=>elem.children[0];
@@ -204,9 +215,9 @@ const validateRouteData = (routeData)=>[
     ].filter((error)=>error);
 const findIndexRoute = (elems)=>elems.find((elem)=>getRouteData(elem).index);
 const findSiblingRoute = (urlPart)=>(elems)=>elems.find(isMatchedRoute(urlPart)) || findIndexRoute(elems);
-const findSiblingRoutes = (elem)=>getHtmlChildren(getHtmlParentElement(elem)).filter(isRoute);
+const findSiblingRoutes = (elem)=>getHtmlChildren(getHtmlParentElement(elem)).filter(isRouteElement);
 const pipe = (firstArg, ...funcs)=>funcs.reduce((arg, func)=>arg != undefined ? func(arg) : arg, firstArg);
-const findDescendantRoute = (elem)=>findHtmlDescendant(elem, isRoute);
+const findDescendantRoute = (elem)=>findHtmlDescendant(elem, isRouteElement);
 const findRoute = (elem, urlPart)=>pipe(elem, findDescendantRoute, findSiblingRoutes, findSiblingRoute(urlPart));
 const toggleRoute = (routeElem, showElem)=>routeElem === showElem ? showHtmlElement(showElem) : hideHtmlElement(routeElem);
 const toggleRoutes = (routeElems, showElem)=>routeElems.map((routeElem)=>toggleRoute(routeElem, showElem));
@@ -217,7 +228,11 @@ const changeRoute = async (elem, url, routes = [])=>{
     ];
     if (!existsRoute(route)) return [
         ,
-        `Route ${url} not found.`
+        routeNotFound.replace("#url", url)
+    ];
+    if (!isAllowedRoute(route)) return [
+        ,
+        routeNotAllowed
     ];
     logInfo(elem, "Route to: ", url);
     const routeData = getRouteData(route);
@@ -245,10 +260,14 @@ const navigateFromHistory = async (elem, url)=>{
     logInfo(elem, navigateTo, url);
     throwError(validateHtmlElement(elem));
     const router = findRouter(elem);
-    if (!router) return logError(elem, missingRouterError), missingRouterError;
+    if (!router) logError(elem, missingRouterError);
+    if (!router) return missingRouterError;
     setRoutingData(router, url);
-    const [routes, changeRouteError] = await changeRoute(router, getUrlPathName(url));
-    if (changeRouteError) return logError(router, navigationError, changeRouteError), navigationError + changeRouteError;
+    const urlPathName = skipQueryString(getUrlPathName(url));
+    const [routes, changeRouteError] = await changeRoute(router, urlPathName);
+    if (changeRouteError) logError(router, navigationError, changeRouteError);
+    if (changeRouteError === routeNotAllowed) getRouterReroute(router)?.(router, url);
+    if (changeRouteError) return navigationError + changeRouteError;
     const consumers = updateConsumers(router);
     return [
         routes,
@@ -259,16 +278,19 @@ const navigateFromUser = (elem, url)=>{
     addToHistory(getHistory(elem), url);
     return navigateFromHistory(elem, url);
 };
-const setPopStateHandler = (window1, navigate)=>setEventHandler(window1, "onpopstate", ()=>navigate(findHtmlDescendant(window1.document.body, isHtmlRouter), window1.location.href, true));
 const setNavigateHandler = (elem, navigate)=>setEventHandler(elem, "onclick", (event)=>event.isNavigate && navigate(event.target, event.target.href));
+const setPopStateHandler = (window1, navigate)=>setEventHandler(window1, "onpopstate", ()=>navigate(findHtmlDescendant(window1.document.body, isHtmlRouter), window1.location.href, true));
+const setRouterReroute = (elem, reroute)=>elem.__reroute = typeof reroute === "function" ? reroute : null;
 const Router = (props, elem)=>{
     setHistory(elem);
-    setPopStateHandler(window, navigateFromHistory);
     setNavigateHandler(elem, navigateFromUser);
+    setPopStateHandler(window, navigateFromHistory);
+    setRouterReroute(elem, props.reroute);
     return props.children;
 };
 const Route = (props, elem)=>{
-    const routeData = createRouteData(props.path, props.child, props.load, "index" in props);
+    const { path, child, load, allow } = props;
+    const routeData = createRouteData(path, child, load, allow, "index" in props);
     throwErrors(validateRouteData(routeData));
     setRouteData(elem, routeData);
     return React.createElement(React.Fragment, null);
