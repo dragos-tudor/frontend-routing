@@ -28,7 +28,7 @@ export const navigateFromHistory = async (elem, url) =>
 
   const [routes, changeRouteError] = await changeRoute(router, urlPathName)
   if(changeRouteError) logError(router, navigationError, changeRouteError)
-  if(changeRouteError === routeNotAllowed) getRouterReroute(router)?.(router, url)
+  if(changeRouteError === routeNotAllowed) return getRouterReroute(router)?.(router, url)
   if(changeRouteError) return navigationError + changeRouteError
 
   const consumers = updateConsumers(router)
