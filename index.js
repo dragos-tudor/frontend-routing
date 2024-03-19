@@ -44,6 +44,7 @@ const setEventHandler = (elem, handlerName, handler)=>{
     return elem;
 };
 const isHtmlRouter = (elem)=>getHtmlName(elem) === "router";
+const isValidRouterReroute = (reroute)=>typeof reroute === "function" || reroute == null;
 const findRouter = (elem)=>findHtmlAscendant(elem, isHtmlRouter);
 const getRouterReroute = (elem)=>elem.__reroute;
 const isLogLibraryEnabled = (elem, libraryName)=>elem.__log.includes(libraryName);
@@ -280,11 +281,16 @@ const navigateFromUser = (elem, url)=>{
 };
 const setNavigateHandler = (elem, navigate)=>setEventHandler(elem, "onclick", (event)=>event.isNavigate && navigate(event.target, event.target.href));
 const setPopStateHandler = (window1, navigate)=>setEventHandler(window1, "onpopstate", ()=>navigate(findHtmlDescendant(window1.document.body, isHtmlRouter), window1.location.href, true));
-const setRouterReroute = (elem, reroute)=>elem.__reroute = typeof reroute === "function" ? reroute : null;
+const setRouterReroute = (elem, reroute)=>elem.__reroute = reroute;
+const validateReRoute = (props)=>isValidRouterReroute(props.reroute) ? "" : "Router reroute should be function.";
+const validateRouterProps = (props)=>[
+        validateReRoute(props)
+    ].filter((error)=>error);
 const Router = (props, elem)=>{
     setHistory(elem);
     setNavigateHandler(elem, navigateFromUser);
     setPopStateHandler(window, navigateFromHistory);
+    throwErrors(validateRouterProps(props));
     setRouterReroute(elem, props.reroute);
     return props.children;
 };
