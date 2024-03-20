@@ -189,8 +189,8 @@ const throwErrors = (messages)=>{
     if (!messages.length) return false;
     throw new Error(messages.join(","));
 };
-const routeNotFound = "Route #url not found.";
-const routeNotAllowed = "Route not allowed.";
+const RouteNotFound = "Route #url not found.";
+const RouteNotAllowed = "Route not allowed.";
 const createRouteData = (path, child, loadChild, allow, index = false)=>Object.freeze({
         path,
         child,
@@ -229,11 +229,11 @@ const changeRoute = async (elem, url, routes = [])=>{
     ];
     if (!existsRoute(route)) return [
         ,
-        routeNotFound.replace("#url", url)
+        RouteNotFound.replace("#url", url)
     ];
     if (!isAllowedRoute(route)) return [
         ,
-        routeNotAllowed
+        RouteNotAllowed
     ];
     logInfo(elem, "Route to: ", url);
     const routeData = getRouteData(route);
@@ -254,21 +254,21 @@ const setRoutingData = (elem, url)=>{
     setSearchParams(elem, resolveSearchParams(url));
     return elem;
 };
-const missingRouterError = "Router is missing.";
-const navigationError = "Navigation error: ";
-const navigateTo = "Navigate to:";
+const MissingRouterError = "Router is missing.";
+const NavigationError = "Navigation error: ";
+const NavigateTo = "Navigate to:";
 const navigateFromHistory = async (elem, url)=>{
-    logInfo(elem, navigateTo, url);
+    logInfo(elem, NavigateTo, url);
     throwError(validateHtmlElement(elem));
     const router = findRouter(elem);
-    if (!router) logError(elem, missingRouterError);
-    if (!router) return missingRouterError;
+    if (!router) logError(elem, MissingRouterError);
+    if (!router) return MissingRouterError;
     setRoutingData(router, url);
     const urlPathName = skipQueryString(getUrlPathName(url));
     const [routes, changeRouteError] = await changeRoute(router, urlPathName);
-    if (changeRouteError) logError(router, navigationError, changeRouteError);
-    if (changeRouteError === routeNotAllowed) return getRouterReroute(router)?.(router, url);
-    if (changeRouteError) return navigationError + changeRouteError;
+    if (changeRouteError) logError(router, NavigationError, changeRouteError);
+    if (changeRouteError === RouteNotAllowed) return getRouterReroute(router)?.(router, url);
+    if (changeRouteError) return NavigationError + changeRouteError;
     const consumers = updateConsumers(router);
     return [
         routes,
@@ -287,11 +287,11 @@ const validateRouterProps = (props)=>[
         validateReRoute(props)
     ].filter((error)=>error);
 const Router = (props, elem)=>{
+    throwErrors(validateRouterProps(props));
+    setRouterReroute(elem, props.reroute);
     setHistory(elem);
     setNavigateHandler(elem, navigateFromUser);
     setPopStateHandler(window, navigateFromHistory);
-    throwErrors(validateRouterProps(props));
-    setRouterReroute(elem, props.reroute);
     return props.children;
 };
 const Route = (props, elem)=>{

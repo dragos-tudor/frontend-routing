@@ -1,4 +1,4 @@
 
-export const routeNotFound = "Route #url not found."
+export const RouteNotFound = "Route #url not found."
 
-export const routeNotAllowed = "Route not allowed."
+export const RouteNotAllowed = "Route not allowed."

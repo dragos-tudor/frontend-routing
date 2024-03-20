@@ -53,7 +53,7 @@ Deno.test("navigate app => navigate to url", async (t) => {
     assertEquals(getHistory(elem).hrefs[0], "/a?id=1")
   })
 
-  await t.step("root route => navigate to url => rendered nested routes", async () => {
+  await t.step("root route => navigate to route path => rendered nested routes", async () => {
     const A = () => <Route path="/b" child={<b></b>}></Route>
     const elem = render(<Router><Route path="/a" child={<A></A>}></Route></Router>)
 
@@ -65,7 +65,7 @@ Deno.test("navigate app => navigate to url", async (t) => {
     assertExists(elem.querySelector("route b"))
   })
 
-  await t.step("old route => navigate to url => rendered new route", async () => {
+  await t.step("old route => navigate to new url => rendered new route", async () => {
     const A = () => <><Route path="/b" child={<b></b>}></Route><Route path="/c" child={<c></c>}></Route></>
     const elem = render(<Router><Route path="/a" child={<A></A>} index></Route></Router>)
 
@@ -106,7 +106,7 @@ Deno.test("navigate app => navigate to url", async (t) => {
     assertExists(elem.querySelector("route c"))
   })
 
-  await t.step("not allowed route => navigate to url => router redirect to new route", async () => {
+  await t.step("not allowed route => navigate to route path => router redirect to new route", async () => {
     const elem = render(<Router reroute={(router, url) => navigateFromUser(router, "/b?returnUrl=" + url)}>
       <Route path="/a" child={<a></a>} allow={false}></Route>
       <Route path="/b" child={<b></b>}></Route>

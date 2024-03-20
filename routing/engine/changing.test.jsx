@@ -1,10 +1,11 @@
 import { assertEquals, assertExists } from "/asserts.ts"
 import { render } from "/rendering.js"
 import { spy, assertSpyCallArgs} from "/mock.ts"
+import { hideHtmlElement, isDisplayedHtmlElement } from "../../routing-html/mod.js"
 import { setRouteParams, getRouteParams, resolveSearchParams, setSearchParams } from "../../routing-params/mod.js"
 import { createRouteData } from "../../routing-routes/mod.js"
+import { RouteNotAllowed } from "../errors/errors.js"
 import { changeRoute } from "./changing.js"
-import { hideHtmlElement, isDisplayedHtmlElement } from "../../routing-html/mod.js";
 
 
 Deno.test("use routes => change routes", async (t) => {
@@ -128,8 +129,8 @@ Deno.test("use routes => change routes", async (t) => {
   })
 
   await t.step("not allowed routes => chang eroute => route not allowed error", async () => {
-    assertEquals((await changeRoute(render(<route __routeData={createRouteData("/", <></>, undefined, false)}></route>), "/"))[1], "Route not allowed.")
-    // assertEquals((await changeRoute(render(<route __routeData={createRouteData("/a", <></>, undefined, false)}></route>), "/a"))[1], "Route not allowed.")
+    assertEquals((await changeRoute(render(<route __routeData={createRouteData("/", <></>, undefined, false)}></route>), "/"))[1], RouteNotAllowed)
+    assertEquals((await changeRoute(render(<route __routeData={createRouteData("/a", <></>, undefined, false)}></route>), "/a"))[1], RouteNotAllowed)
   })
 
 })
