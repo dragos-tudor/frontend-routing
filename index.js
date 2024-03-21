@@ -189,6 +189,8 @@ const throwErrors = (messages)=>{
     if (!messages.length) return false;
     throw new Error(messages.join(","));
 };
+const MissingRouterError = "Router is missing.";
+const NavigationError = "Navigation error: ";
 const RouteNotFound = "Route #url not found.";
 const RouteNotAllowed = "Route not allowed.";
 const createRouteData = (path, child, loadChild, allow, index = false)=>Object.freeze({
@@ -248,14 +250,6 @@ const changeRoute = async (elem, url, routes = [])=>{
         route
     ]);
 };
-const setRoutingData = (elem, url)=>{
-    setLocation(elem, url);
-    setRouteParams(elem, {});
-    setSearchParams(elem, resolveSearchParams(url));
-    return elem;
-};
-const MissingRouterError = "Router is missing.";
-const NavigationError = "Navigation error: ";
 const NavigateTo = "Navigate to:";
 const navigateFromHistory = async (elem, url)=>{
     logInfo(elem, NavigateTo, url);
@@ -263,7 +257,9 @@ const navigateFromHistory = async (elem, url)=>{
     const router = findRouter(elem);
     if (!router) logError(elem, MissingRouterError);
     if (!router) return MissingRouterError;
-    setRoutingData(router, url);
+    setLocation(router, url);
+    setRouteParams(router, {});
+    setSearchParams(router, resolveSearchParams(url));
     const urlPathName = skipQueryString(getUrlPathName(url));
     const [routes, changeRouteError] = await changeRoute(router, urlPathName);
     if (changeRouteError) logError(router, NavigationError, changeRouteError);

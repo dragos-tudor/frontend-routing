@@ -1,17 +1,14 @@
 import { findRouter, getRouterReroute } from "../../routing-components/private.js"
 import { updateConsumers } from "../../routing-consumers/mod.js"
 import { validateHtmlElement } from "../../routing-html/mod.js"
-import { addToHistory, getHistory } from "../../routing-locations/mod.js"
-import { skipQueryString } from "../../routing-params/mod.js"
+import { addToHistory, getHistory, setLocation } from "../../routing-locations/mod.js"
+import { resolveSearchParams, setRouteParams, setSearchParams, skipQueryString } from "../../routing-params/mod.js"
 import { getUrlPathName } from "../../routing-urls/mod.js"
 import { throwError } from "../../support-errors/mod.js"
 import { logError, logInfo } from "../../support-loggers/mod.js"
-import { RouteNotAllowed } from "../errors/errors.js"
+import { MissingRouterError, NavigationError, RouteNotAllowed } from "../errors/errors.js"
 import { changeRoute } from "./changing.js"
-import { setRoutingData } from "./setting.js"
 
-const MissingRouterError = "Router is missing."
-const NavigationError = "Navigation error: "
 const NavigateTo = "Navigate to:"
 
 export const navigateFromHistory = async (elem, url) =>
@@ -23,7 +20,9 @@ export const navigateFromHistory = async (elem, url) =>
   if(!router) logError(elem, MissingRouterError)
   if(!router) return MissingRouterError
 
-  setRoutingData(router, url)
+  setLocation(router, url)
+  setRouteParams(router, {})
+  setSearchParams(router, resolveSearchParams(url))
   const urlPathName = skipQueryString(getUrlPathName(url))
 
   const [routes, changeRouteError] = await changeRoute(router, urlPathName)
