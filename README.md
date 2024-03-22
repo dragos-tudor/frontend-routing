@@ -44,10 +44,10 @@ navigate(document.querySelector("router"), "/")
 ### [Routing](./routing/)
 - main functionality: user/history navigation, change routes.
 - `navigateFromUser`:
-  - for current element find (ascending) router.
+  - for current element find html root.
   - store location, search params, history [skipped by `navigateFromHistory`].
-  - change routes starting from router [`changeRoutes`].
-  - update **current path** routing consumers starting from router.
+  - change routes starting from root [`changeRoutes`].
+  - update **current path** routing consumers starting from root.
 - `changeRoutes`:
   - find matching route for url.
   - store route params.

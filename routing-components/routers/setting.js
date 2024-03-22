@@ -7,6 +7,3 @@ export const setNavigateHandler = (elem, navigate) =>
 export const setPopStateHandler = (window, navigate) =>
   setEventHandler(window, "onpopstate", () => navigate(findHtmlDescendant(window.document.body, isHtmlRouter), window.location.href, true))
 
-export const setRouterReroute = (elem, reroute) =>
-  elem.__reroute = reroute
-

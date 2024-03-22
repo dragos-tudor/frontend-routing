@@ -106,14 +106,4 @@ Deno.test("navigate app => navigate to url", async (t) => {
     assertExists(elem.querySelector("route c"))
   })
 
-  await t.step("not allowed route => navigate to route path => router redirect to new route", async () => {
-    const elem = render(<Router reroute={(router, url) => navigateFromUser(router, "/b?returnUrl=" + url)}>
-      <Route path="/a" child={<a></a>} allow={false}></Route>
-      <Route path="/b" child={<b></b>}></Route>
-    </Router>)
-
-    await navigateFromUser(elem, "/a")
-    assertExists(elem.querySelector("route b"))
-  })
-
 })

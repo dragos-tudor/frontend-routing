@@ -4,7 +4,6 @@ import { spy, assertSpyCallArgs} from "/mock.ts"
 import { hideHtmlElement, isDisplayedHtmlElement } from "../../routing-html/mod.js"
 import { setRouteParams, getRouteParams, resolveSearchParams, setSearchParams } from "../../routing-params/mod.js"
 import { createRouteData } from "../../routing-routes/mod.js"
-import { RouteNotAllowed } from "../errors/errors.js"
 import { changeRoute } from "./changing.js"
 
 
@@ -26,7 +25,10 @@ Deno.test("use routes => change routes", async (t) => {
   })
 
   await t.step("fallback route => change route => shown fallback route", async () => {
-    const elem = render(<a><route __routeData={createRouteData("/b", <b></b> )}></route><route class="c" __routeData={createRouteData(/\/.*/, <c></c> )}></route></a>)
+    const elem = render(<a>
+      <route __routeData={createRouteData("/b", <b></b> )}></route>
+      <route class="c" __routeData={createRouteData(/\/.*/, <c></c> )}></route>
+    </a>)
     hideHtmlElement(elem.querySelector(".c"))
     const actual = await changeRoute(elem, "/x")
 
@@ -128,11 +130,6 @@ Deno.test("use routes => change routes", async (t) => {
     assertEquals((await changeRoute(render(<route __routeData={createRouteData("/a", <></>)}></route>), "/a/b"))[1], "Route /b not found.")
   })
 
-  await t.step("not allowed routes => chang eroute => route not allowed error", async () => {
-    assertEquals((await changeRoute(render(<route __routeData={createRouteData("/", <></>, undefined, false)}></route>), "/"))[1], RouteNotAllowed)
-    assertEquals((await changeRoute(render(<route __routeData={createRouteData("/a", <></>, undefined, false)}></route>), "/a"))[1], RouteNotAllowed)
-  })
-
 })
 
-const createIndexRoute = (path, child) => createRouteData(path, child, undefined, undefined, true)
+const createIndexRoute = (path, child) => createRouteData(path, child, undefined, true)
