@@ -280,6 +280,6 @@ const Route = (props, elem)=>{
 export { NavLink as NavLink };
 export { Router as Router };
 export { Route as Route };
-export { useHistory as useHistory, useLocation as useLocation };
+export { useHistory as useHistory, useLocation as useLocation, setLocation as setLocation };
 export { useSearchParams as useSearchParams, useRouteParams as useRouteParams };
 export { navigateFromUser as navigate, changeRoute as changeRoute };
