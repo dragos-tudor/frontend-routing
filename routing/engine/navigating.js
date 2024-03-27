@@ -8,11 +8,9 @@ import { logError, logInfo } from "../../support-loggers/mod.js"
 import { NavigationError } from "../errors/errors.js"
 import { changeRoute } from "./changing.js"
 
-const NavigateTo = "Navigate to:"
-
 export const navigateFromHistory = async (elem, url) =>
 {
-  logInfo(elem, NavigateTo, url)
+  logInfo(elem, "Navigate to:", url)
   throwError(validateHtmlElement(elem))
 
   const root = findHtmlRoot(elem)
