@@ -74,7 +74,7 @@ const resolveSearchParams = (url)=>{
     const queryString = getQueryString(url);
     const searchParams = new URLSearchParams(queryString);
     if (!searchParams.size) return undefined;
-    return searchParams.entries().reduce(setSearchParam, {});
+    return Array.from(searchParams.entries()).reduce(setSearchParam, {});
 };
 const skipQueryString = (url, delimiter = QueryDelimiter)=>url.split(delimiter)[0];
 const useSearchParams = (elem)=>(elem.__searchParams = true) && getSearchParams(elem);

@@ -6,7 +6,7 @@ export const resolveSearchParams = (url) => {
   const searchParams = new URLSearchParams(queryString)
   if(!searchParams.size) return undefined
 
-  return searchParams
-    .entries()
+  return Array
+    .from(searchParams.entries())
     .reduce(setSearchParam, {})
 }
