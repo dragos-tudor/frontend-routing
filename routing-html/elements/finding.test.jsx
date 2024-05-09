@@ -1,5 +1,5 @@
 import { assertEquals } from "/asserts.ts"
-import { findHtmlAscendant, findHtmlAscendants, findHtmlDescendant, findHtmlDescendants } from "./finding.js"
+import { findHtmlAscendant, findHtmlDescendant, findHtmlDescendants } from "./finding.js"
 import { render } from "/rendering.js"
 
 
@@ -12,20 +12,12 @@ Deno.test("use html routes => find elements", async (t) => {
     assertEquals(findHtmlAscendant(render(<a></a>), e => e.tagName === "B"), undefined)
   })
 
-  await t.step("html tree => find ascendants => ascendant elements", () => {
-    assertEquals(findHtmlAscendants(render(<a></a>), e => e.tagName === "A")[0].tagName, "A")
-    assertEquals(findHtmlAscendants(render(<a><b></b></a>).querySelector("b"), e => e.tagName === "A")[0].tagName, "A")
-    assertEquals(findHtmlAscendants(render(<a><b><c></c></b></a>).querySelector("c"), e => e.tagName === "A")[0].tagName, "A")
-    assertEquals(findHtmlAscendants(render(<a><a><c></c></a></a>).querySelector("c"), e => e.tagName === "A").map(e => e.tagName), ["A", "A"])
-    assertEquals(findHtmlAscendants(render(<a></a>), e => e.tagName === "B"), [])
-  })
-
   await t.step("html tree => find descendant => descendant element", () => {
     assertEquals(findHtmlDescendant(render(<a></a>), e => e.tagName === "A").tagName, "A")
     assertEquals(findHtmlDescendant(render(<a><b></b></a>), e => e.tagName === "B").tagName, "B")
     assertEquals(findHtmlDescendant(render(<a><b><c></c></b></a>), e => e.tagName === "C").tagName, "C")
     assertEquals(findHtmlDescendant(render(<a><b></b><c></c></a>), e => e.tagName === "C").tagName, "C")
-    assertEquals(findHtmlDescendant(render(<a><b><c class="x"></c></b><c></c></a>), e => e.tagName === "C").className, "x")
+    assertEquals(findHtmlDescendant(render(<a><b><c class="level2"></c></b><c class="level1"></c></a>), e => e.tagName === "C").className, "level1")
     assertEquals(findHtmlDescendant(render(<a></a>), e => e.tagName === "B"), undefined)
   })
 

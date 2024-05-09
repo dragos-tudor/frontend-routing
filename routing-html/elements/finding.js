@@ -1,31 +1,29 @@
-import { getHtmlBody, getHtmlParentElement } from "./getting.js";
+import { getHtmlBody, getHtmlParentElement } from "./getting.js"
+import { flatHtmlChildren } from "./flattening.js"
+import { existsHtmlElement, existsHtmlElements } from "./verifying.js"
 
-export const findHtmlAscendant = (elem, func) => {
-  if(!elem) return
-  if(func(elem)) return elem
-  return findHtmlAscendant(getHtmlParentElement(elem), func)
-}
+const findHtmlElement = (elems, func) => elems.find(func)
 
-export const findHtmlAscendants = (elem, func, elems = []) => {
-  if(!elem) return elems
-  if(func(elem)) elems.push(elem)
-  return findHtmlAscendants(getHtmlParentElement(elem), func, elems)
-}
+const findsHtmlDescendant = (elems, func) =>
+  findHtmlElement(elems, func) ||
+  (existsHtmlElements(elems)?
+    findsHtmlDescendant(flatHtmlChildren(elems), func):
+    undefined)
 
-export const findHtmlDescendant = (elem, func) => {
-  if(func(elem)) return elem
-  for(let index = 0; index < elem.children.length; index++) {
-    const descendant = findHtmlDescendant(elem.children[index], func)
-    if(descendant) return descendant
-  }
-}
+const findsHtmlDescendants = (elems, func, result = []) =>
+  (!existsHtmlElements(elems) && result) ||
+  findsHtmlDescendants(flatHtmlChildren(elems), func, [...result, ...elems.filter(func)])
 
-export const findHtmlDescendants = (elem, func, elems = []) => {
-  if(func(elem)) elems.push(elem)
-  for(let index = 0; index < elem.children.length; index++)
-    findHtmlDescendants(elem.children[index], func, elems)
-  return elems
-}
+export const findHtmlAscendant = (elem, func) =>
+  (existsHtmlElement(elem) || undefined) &&
+  (func(elem) && elem ||
+   findHtmlAscendant(getHtmlParentElement(elem), func))
+
+export const findHtmlDescendant = (elem, func) =>
+  findsHtmlDescendant([elem], func)
+
+export const findHtmlDescendants = (elem, func) =>
+  findsHtmlDescendants([elem], func)
 
 export const findHtmlRoot = (elem) =>
   globalThis["Deno"]?

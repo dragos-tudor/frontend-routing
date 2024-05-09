@@ -1,5 +1,5 @@
-import { findHtmlAscendants } from "../../routing-html/elements/finding.js"
-import { isRouteElement } from "../../routing-routes/routes/verifying.js"
+import { findHtmlAscendant, isHiddenHtmlElement } from "../../routing-html/mod.js";
+import { isRouteElement } from "../../routing-routes/mod.js"
 
 export const isConsumer = (elem) =>
   elem.__history ||
@@ -7,4 +7,6 @@ export const isConsumer = (elem) =>
   elem.__routeParams ||
   elem.__searchParams
 
-export const isVisiblePath = (elem) => findHtmlAscendants(elem, isRouteElement).every(elem => !elem.hidden)
+export const isVisiblePath = (elem) =>
+  !findHtmlAscendant(elem, (elem) =>
+    isRouteElement(elem) && isHiddenHtmlElement(elem))

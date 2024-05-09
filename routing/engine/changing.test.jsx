@@ -1,7 +1,7 @@
 import { assertEquals, assertExists } from "/asserts.ts"
 import { render } from "/rendering.js"
 import { spy, assertSpyCallArgs} from "/mock.ts"
-import { hideHtmlElement, isDisplayedHtmlElement } from "../../routing-html/mod.js"
+import { hideHtmlElement, isShownHtmlElement } from "../../routing-html/mod.js"
 import { setRouteParams, getRouteParams, resolveSearchParams, setSearchParams } from "../../routing-params/mod.js"
 import { createRouteData } from "../../routing-routes/mod.js"
 import { changeRoute } from "./changing.js"
@@ -21,7 +21,7 @@ Deno.test("use routes => change routes", async (t) => {
     hideHtmlElement(elem)
     const actual = await changeRoute(elem, "/a")
 
-    assertEquals(isDisplayedHtmlElement(elem), true)
+    assertEquals(isShownHtmlElement(elem), true)
   })
 
   await t.step("fallback route => change route => shown fallback route", async () => {
@@ -33,7 +33,7 @@ Deno.test("use routes => change routes", async (t) => {
     const actual = await changeRoute(elem, "/x")
 
     assertExists(elem.querySelector("route c"))
-    assertEquals(isDisplayedHtmlElement(elem.querySelector(".c")), true)
+    assertEquals(isShownHtmlElement(elem.querySelector(".c")), true)
   })
 
   await t.step("nested routes => change route => rendered nested routes", async () => {
@@ -86,8 +86,8 @@ Deno.test("use routes => change routes", async (t) => {
       </route>)
     await changeRoute(elem, "/a/c")
 
-    assertEquals(isDisplayedHtmlElement(elem.querySelector(".b")), false)
-    assertEquals(isDisplayedHtmlElement(elem.querySelector(".c")), true)
+    assertEquals(isShownHtmlElement(elem.querySelector(".b")), false)
+    assertEquals(isShownHtmlElement(elem.querySelector(".c")), true)
   })
 
   await t.step("route params => change route => stored route params", async () => {
