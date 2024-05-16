@@ -38,8 +38,8 @@ navigate(document.querySelector("router"), "/")
 ```
 
 ### Modules
-- main modules: routing, routing-components.
-- support modules: routing-\*, support-\*.
+- high-level modules: routing, routing-components, routing-consumers.
+- low-level modules: routing-html, routing-locations, routing-params, routing-routes, routing-urls, support-errors, support-loggers.
 
 ### [Routing](./routing/)
 - main functionality: user/history navigation, change routes.
