@@ -40,7 +40,7 @@ navigate(document.querySelector("router"), "/")
 ### Modules
 - *high-level modules*: routing, routing-components, routing-routes, routing-consumers.
 - *low-level modules*: routing-html, routing-locations, routing-params, routing-urls.
-- *simple architecture* design: all low-level modules **are independent** of each other [excepting routing-routes *low-level module*].
+- *simple architecture* design: all low-level modules **are independently** of each other.
 
 ### [Routing](./routing/)
 - main functionality: user/history navigation, change routes.
