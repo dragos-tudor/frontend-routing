@@ -1,4 +1,4 @@
-import { logInfo } from "../../routing/loggers/logging.js"
+import { logInfo } from "../loggers/logging.js"
 import { getHtmlName } from "../../routing-html/mod.js"
 import { getUpdateFunc } from "../funcs/getting.js"
 import { findConsumers } from "./finding.js"

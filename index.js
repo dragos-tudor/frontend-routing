@@ -178,8 +178,6 @@ const findDescendantRoute = (elem)=>findHtmlDescendant(elem, isRouteElement);
 const findRoute = (elem, urlPart)=>pipe(elem, findDescendantRoute, findSiblingRoutes, findSiblingRoute(urlPart));
 const toggleRoute = (routeElem, showElem)=>routeElem === showElem ? showHtmlElement(showElem) : hideHtmlElement(routeElem);
 const toggleRoutes = (routeElems, showElem)=>routeElems.map((routeElem)=>toggleRoute(routeElem, showElem));
-const NavigationError = "Navigation error: ";
-const RouteNotFound = "Route #url not found.";
 const isLogLibraryEnabled = (elem, libraryName)=>elem.__log.includes(libraryName);
 const isLogMounted = (elem)=>elem.__log instanceof Array;
 const isLogEnabled = (elem, libraryName)=>isLogMounted(elem) && isLogLibraryEnabled(elem, libraryName);
@@ -187,6 +185,14 @@ const LibraryName = "routing";
 const LogHeader = "[routing]";
 const logError = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.error(LogHeader, ...args);
 const logInfo = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.info(LogHeader, ...args);
+const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
+const isConsumer = (elem)=>elem.__history || elem.__location || elem.__routeParams || elem.__searchParams;
+const isVisiblePath = (elem)=>!findHtmlAscendant(elem, (elem)=>isRouteElement(elem) && isHiddenHtmlElement(elem));
+const findConsumers = (elem)=>findHtmlDescendants(elem, isConsumer);
+const updateConsumer = (update)=>(elem)=>(logInfo(elem, "Update routing consumer: ", getHtmlName(elem)), update(elem)[0]);
+const updateConsumers = (elem, update = getUpdateFunc(elem))=>findConsumers(elem).filter(isVisiblePath).map(updateConsumer(update));
+const NavigationError = "Navigation error: ";
+const RouteNotFound = "Route #url not found.";
 const changeRoute = async (elem, url, routes = [])=>{
     const route = findRoute(elem, url);
     if (!existsRoute(route) && isEmptyPath(url)) return [
@@ -209,12 +215,6 @@ const changeRoute = async (elem, url, routes = [])=>{
         route
     ]);
 };
-const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
-const isConsumer = (elem)=>elem.__history || elem.__location || elem.__routeParams || elem.__searchParams;
-const isVisiblePath = (elem)=>!findHtmlAscendant(elem, (elem)=>isRouteElement(elem) && isHiddenHtmlElement(elem));
-const findConsumers = (elem)=>findHtmlDescendants(elem, isConsumer);
-const updateConsumer = (update)=>(elem)=>(logInfo(elem, "Update routing consumer: ", getHtmlName(elem)), update(elem)[0]);
-const updateConsumers = (elem, update = getUpdateFunc(elem))=>findConsumers(elem).filter(isVisiblePath).map(updateConsumer(update));
 const addToHistory = (history, url, state = {})=>history?.pushState(state, "", url);
 const getHistory = (elem)=>elem.ownerDocument.__history;
 const getHistoryPolyfill = (hrefs = [])=>Object.freeze({
