@@ -209,10 +209,10 @@ const changeRoute = async (elem, url, routes = [])=>{
         route
     ]);
 };
+const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
 const isConsumer = (elem)=>elem.__history || elem.__location || elem.__routeParams || elem.__searchParams;
 const isVisiblePath = (elem)=>!findHtmlAscendant(elem, (elem)=>isRouteElement(elem) && isHiddenHtmlElement(elem));
 const findConsumers = (elem)=>findHtmlDescendants(elem, isConsumer);
-const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
 const updateConsumer = (update)=>(elem)=>(logInfo(elem, "Update routing consumer: ", getHtmlName(elem)), update(elem)[0]);
 const updateConsumers = (elem, update = getUpdateFunc(elem))=>findConsumers(elem).filter(isVisiblePath).map(updateConsumer(update));
 const addToHistory = (history, url, state = {})=>history?.pushState(state, "", url);

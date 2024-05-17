@@ -3,9 +3,9 @@ import { findHtmlRoot, validateHtmlElement } from "../../routing-html/mod.js"
 import { addToHistory, getHistory, setLocation } from "../../routing-locations/mod.js"
 import { resolveSearchParams, setRouteParams, setSearchParams, skipQueryString } from "../../routing-params/mod.js"
 import { getUrlPathName } from "../../routing-urls/mod.js"
-import { logError, logInfo } from "../../support-loggers/mod.js"
 import { NavigationError } from "../errors/errors.js"
 import { throwError } from "../errors/throwing.js"
+import { logError, logInfo } from "../loggers/logging.js"
 import { changeRoute } from "./changing.js"
 
 export const navigateFromHistory = async (elem, url) =>

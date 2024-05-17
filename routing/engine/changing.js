@@ -2,7 +2,7 @@ import { addRouteParams, getRouteParams, getSearchParams, resolveRouteParams } f
 import { getRouteChild, getRouteData, existsRoute, findRoute, findSiblingRoutes, renderRouteChild, toggleRoutes } from "../../routing-routes/mod.js"
 import { isEmptyPath, getUrlPath, skipUrlPath} from "../../routing-urls/mod.js"
 import { RouteNotFound } from "../errors/errors.js"
-import { logInfo } from "../../support-loggers/mod.js"
+import { logInfo } from "../loggers/logging.js"
 
 export const changeRoute = async (elem, url, routes = []) =>
 {
