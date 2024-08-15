@@ -1,1 +1,0 @@
-export { getRouterReroute } from "./routers/getting.js"

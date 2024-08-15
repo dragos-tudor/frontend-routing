@@ -39,13 +39,12 @@ navigate(document.querySelector("router"), "/")
 
 ### Modules
 - *high-level modules*: routing, routing-components.
-- *middle-level modules*: routing-routes, routing-consumers.
 - *low-level modules*: routing-html, routing-locations, routing-params, routing-urls.
-- *simple architecture* design: all low-level modules **are independently** of each other.
+- *low-level modules* completely independent ["parallel" modules].
 
 ### [Routing](./routing/)
-- main functionality: user/history navigation, change routes.
-- `navigateFromUser`:
+- main functionality: route navigation, change routes, update routing consumers.
+- `navigateToRoute`:
   - for current element find html root.
   - store location, search params, history [skipped by `navigateFromHistory`].
   - change routes starting from root [`changeRoutes`].
@@ -72,6 +71,3 @@ navigate(document.querySelector("router"), "/")
   - render routes children.
   - find route siblings.
   - manage routes data.
-
-### [Consumers](./routing-consumers/)
-- main functionality: update routing consumers.
