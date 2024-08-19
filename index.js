@@ -166,8 +166,8 @@ const findHtmlAscendant = (elem, func)=>{
     if (func(elem)) return elem;
     return findHtmlAscendant(getHtmlParentElement(elem), func);
 };
-const findHtmlDescendant = (elem, func, findStrategy = findBreadthHtmlDescendant)=>func(elem) ? elem : findStrategy(getHtmlChildren(elem), func);
-const findHtmlDescendants = (elem, func, result = [], findStrategy = findBreadthHtmlDescendants)=>(func(elem) && result.push(elem), findStrategy(getHtmlChildren(elem), func, result));
+const findHtmlDescendant = (elem, func, findStrategy = findBreadthHtmlDescendant)=>findStrategy(getHtmlChildren(elem), func);
+const findHtmlDescendants = (elem, func, result = [], findStrategy = findBreadthHtmlDescendants)=>findStrategy(getHtmlChildren(elem), func, result);
 const findHtmlRoot = (elem)=>globalThis["Deno"] ? findHtmlAscendant(elem, (elem)=>!getHtmlParentElement(elem)) : getHtmlBody(elem);
 const hideHtmlElement = (elem)=>(elem.style.display = "none", elem);
 const showHtmlElement = (elem)=>(elem.style.display = "block", elem);
@@ -187,8 +187,8 @@ const findIndexRoute = (elems)=>elems.find((elem)=>getRouteData(elem).index);
 const findSiblingRoute = (urlPart)=>(elems)=>elems.find(isMatchedRoute(urlPart)) || findIndexRoute(elems);
 const findSiblingRoutes = (elem)=>getHtmlChildren(getHtmlParentElement(elem)).filter(isRouteElement);
 const pipe = (firstArg, ...funcs)=>funcs.reduce((arg, func)=>arg != undefined ? func(arg) : arg, firstArg);
-const findDescendantRoute = (elem)=>findHtmlDescendant(elem, isRouteElement);
-const findRoute = (elem, urlPart)=>pipe(elem, findDescendantRoute, findSiblingRoutes, findSiblingRoute(urlPart));
+const findSelfOrDescendantRoute = (elem)=>isRouteElement(elem) ? elem : findHtmlDescendant(elem, isRouteElement);
+const findRoute = (elem, urlPart)=>pipe(elem, findSelfOrDescendantRoute, findSiblingRoutes, findSiblingRoute(urlPart));
 const toggleRoute = (routeElem, showElem)=>routeElem === showElem ? showHtmlElement(showElem) : hideHtmlElement(routeElem);
 const toggleRoutes = (routeElems, showElem)=>routeElems.map((routeElem)=>toggleRoute(routeElem, showElem));
 const changeRoute = async (elem, url, routes = [])=>{
