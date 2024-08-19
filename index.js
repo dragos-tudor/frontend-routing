@@ -146,24 +146,28 @@ const getHtmlBody = (elem)=>elem.ownerDocument.body;
 const getHtmlChildren = (elem)=>Array.from(elem.children);
 const getHtmlName = (elem)=>elem.tagName.toLowerCase();
 const getHtmlParentElement = (elem)=>elem.parentElement;
-const flatHtmlChildren = (elems)=>elems.flatMap(getHtmlChildren);
+const findBreadthHtmlDescendant = (elems, func)=>{
+    for (const elem of elems)if (func(elem)) return elem;
+    for (const elem of elems){
+        const descendant = findBreadthHtmlDescendant(getHtmlChildren(elem), func);
+        if (descendant) return descendant;
+    }
+};
+const findBreadthHtmlDescendants = (elems, func, result = [])=>{
+    for (const elem of elems)if (func(elem)) result.push(elem);
+    for (const elem of elems)findBreadthHtmlDescendants(getHtmlChildren(elem), func, result);
+    return result;
+};
 const existsHtmlElement = (elem)=>!!elem;
-const existsHtmlElements = (elems)=>elems.length !== 0;
 const isHiddenHtmlElement = (elem)=>elem.hidden;
 const isHtmlElement = (elem)=>elem.nodeType === 1;
-const findHtmlElement = (elems, func)=>elems.find(func);
-const findsHtmlDescendant = (elems, func)=>findHtmlElement(elems, func) || (existsHtmlElements(elems) ? findsHtmlDescendant(flatHtmlChildren(elems), func) : undefined);
-const findsHtmlDescendants = (elems, func, result = [])=>!existsHtmlElements(elems) && result || findsHtmlDescendants(flatHtmlChildren(elems), func, [
-        ...result,
-        ...elems.filter(func)
-    ]);
-const findHtmlAscendant = (elem, func)=>(existsHtmlElement(elem) || undefined) && (func(elem) && elem || findHtmlAscendant(getHtmlParentElement(elem), func));
-const findHtmlDescendant = (elem, func)=>findsHtmlDescendant([
-        elem
-    ], func);
-const findHtmlDescendants = (elem, func)=>findsHtmlDescendants([
-        elem
-    ], func);
+const findHtmlAscendant = (elem, func)=>{
+    if (!existsHtmlElement(elem)) return undefined;
+    if (func(elem)) return elem;
+    return findHtmlAscendant(getHtmlParentElement(elem), func);
+};
+const findHtmlDescendant = (elem, func, findStrategy = findBreadthHtmlDescendant)=>func(elem) ? elem : findStrategy(getHtmlChildren(elem), func);
+const findHtmlDescendants = (elem, func, result = [], findStrategy = findBreadthHtmlDescendants)=>(func(elem) && result.push(elem), findStrategy(getHtmlChildren(elem), func, result));
 const findHtmlRoot = (elem)=>globalThis["Deno"] ? findHtmlAscendant(elem, (elem)=>!getHtmlParentElement(elem)) : getHtmlBody(elem);
 const hideHtmlElement = (elem)=>(elem.style.display = "none", elem);
 const showHtmlElement = (elem)=>(elem.style.display = "block", elem);
