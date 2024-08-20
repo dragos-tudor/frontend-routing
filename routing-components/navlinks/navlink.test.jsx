@@ -1,6 +1,6 @@
 import { assertEquals } from "/asserts.ts"
 import { render } from "/rendering.js"
-import { NavLink } from "./NavLink.jsx"
+import { NavLink } from "./navlink.jsx"
 
 Deno.test("navigate app => use navigation links", async (t) => {
 
