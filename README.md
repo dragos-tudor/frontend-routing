@@ -52,7 +52,7 @@ navigate(document.querySelector("router"), "/")
 - `changeRoutes`:
   - find matching route for url.
   - store route params.
-  - show mached route, hide sibling routes.
+  - show matched route, hide sibling routes.
   - show route static child (jsx factory) or dynamic loaded child.
   - remove route path from url.
   - change descendant routes with remaining url.
@@ -60,8 +60,8 @@ navigate(document.querySelector("router"), "/")
 ### [Components](./routing-components/)
 - main functionality: implement routing components.
 - `Router`:
-  - register `popstate` event handler `navigateFromHistory`.
-  - register `navigate` event handler `navigateFromUser`.
+  - register `popstate` event handler `navigateToHistoryRoute`.
+  - register `navigate` event handler `navigateToRoute`.
 - `Route`: set static (jsx factory) or dynamic loading function.
 - `NavLink`: on click raise `navigate` event.
 
