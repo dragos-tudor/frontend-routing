@@ -1,6 +1,6 @@
 import { getStringType } from "./getting.js"
 
-export const toStringType = (text) => {
+export const fromStringType = (text) => {
   if(typeof text !== 'string') return text
   switch(text){
     case "": return ""

@@ -13,17 +13,18 @@ import { existsRoute } from "./verifying.js"
 export const changeRoute = async (elem, url, routes = []) =>
 {
   const route = findRoute(elem, url)
-  if(!existsRoute(route) && isEmptyPath(url)) return [routes]
-  if(!existsRoute(route)) return [, RouteNotFound.replace("#url", url)]
+  if(!existsRoute(route) && !isEmptyPath(url)) return [, RouteNotFound.replace("#url", url)]
+  if(!existsRoute(route)) return [routes]
   logInfo(elem, "Route to: ", url)
 
   const routeData = getRouteData(route)
-  const routeParams = resolveRouteParams(url, routeData.path)
-  addRouteParams(getRouteParams(route), routeParams)
+  const pathRouteParams = resolveRouteParams(url, routeData.path)
+  const routeParams = addRouteParams(getRouteParams(route), pathRouteParams)
+  const searchParams = getSearchParams(route)
+  const routeChild = getRouteChild(route) || await renderRouteChild(route, routeData, routeParams, searchParams)
 
-  const routeChild = getRouteChild(route) ||
-    await renderRouteChild(route, routeData, getRouteParams(route), getSearchParams(route))
-  toggleRoutes(findSiblingRoutes(route), route)
+  const siblingRoutes = findSiblingRoutes(route)
+  toggleRoutes(siblingRoutes, route)
 
   const urlPath = getUrlPath(url, routeData.path)
   const nextUrl = skipUrlPath(url, urlPath)
