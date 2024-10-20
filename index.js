@@ -40,7 +40,7 @@ const getStringType = (text)=>{
     if (isIntegerString(text)) return "integer";
     if (isDateString(text)) return "date";
 };
-const toStringType = (text)=>{
+const fromStringType = (text)=>{
     if (typeof text !== 'string') return text;
     switch(text){
         case "":
@@ -70,7 +70,7 @@ const toStringType = (text)=>{
     }
 };
 const removePrefix = (param)=>param.replace(":", "");
-const setRouteParam = (params, param)=>(params[removePrefix(param[0])] = toStringType(param[1]), params);
+const setRouteParam = (params, param)=>(params[removePrefix(param[0])] = fromStringType(param[1]), params);
 const setRouteParams = (elem, params)=>elem.ownerDocument.__routeParams = params;
 const RouteParamPrefix = ":";
 const isRouteParam = (routePart)=>routePart.startsWith(RouteParamPrefix) || routePart.startsWith("/" + RouteParamPrefix);
@@ -87,7 +87,7 @@ const useRouteParams = (elem)=>(elem.__routeParams = true) && getRouteParams(ele
 const QueryDelimiter = "?";
 const getQueryString = (url, delimiter = QueryDelimiter)=>splitPath(url, delimiter)[1];
 const getSearchParams = (elem)=>elem.ownerDocument.__searchParams;
-const setSearchParam = (params, param)=>(params[param[0]] = toStringType(param[1]), params);
+const setSearchParam = (params, param)=>(params[param[0]] = fromStringType(param[1]), params);
 const setSearchParams = (elem, params)=>elem.ownerDocument.__searchParams = params;
 const resolveSearchParams = (url)=>{
     const queryString = getQueryString(url);
@@ -140,6 +140,7 @@ const logError = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.err
 const logInfo = (elem, ...args)=>isLogEnabled(elem, LibraryName) && console.info(LogHeader, ...args);
 const getRouteChild = (elem)=>elem.children[0];
 const getRenderFunc = (elem)=>elem?.ownerDocument?.__render;
+const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
 const renderRouteChild = async (elem, routeData, routeParams, searchParams, render = getRenderFunc(elem))=>existsRouteDataLoadChild(routeData) ? render(await routeData.loadChild(routeParams, searchParams), elem)[0] : render(routeData.child, elem)[0];
 const getRouteData = (elem)=>elem.__routeData;
 const getHtmlBody = (elem)=>elem.ownerDocument.body;
@@ -193,19 +194,21 @@ const toggleRoute = (routeElem, showElem)=>routeElem === showElem ? showHtmlElem
 const toggleRoutes = (routeElems, showElem)=>routeElems.map((routeElem)=>toggleRoute(routeElem, showElem));
 const changeRoute = async (elem, url, routes = [])=>{
     const route = findRoute(elem, url);
-    if (!existsRoute(route) && isEmptyPath(url)) return [
-        routes
-    ];
-    if (!existsRoute(route)) return [
+    if (!existsRoute(route) && !isEmptyPath(url)) return [
         ,
         RouteNotFound.replace("#url", url)
     ];
+    if (!existsRoute(route)) return [
+        routes
+    ];
     logInfo(elem, "Route to: ", url);
     const routeData = getRouteData(route);
-    const routeParams = resolveRouteParams(url, routeData.path);
-    addRouteParams(getRouteParams(route), routeParams);
-    const routeChild = getRouteChild(route) || await renderRouteChild(route, routeData, getRouteParams(route), getSearchParams(route));
-    toggleRoutes(findSiblingRoutes(route), route);
+    const pathRouteParams = resolveRouteParams(url, routeData.path);
+    const routeParams = addRouteParams(getRouteParams(route), pathRouteParams);
+    const searchParams = getSearchParams(route);
+    const routeChild = getRouteChild(route) || await renderRouteChild(route, routeData, routeParams, searchParams);
+    const siblingRoutes = findSiblingRoutes(route);
+    toggleRoutes(siblingRoutes, route);
     const urlPath = getUrlPath(url, routeData.path);
     const nextUrl = skipUrlPath(url, urlPath);
     return changeRoute(routeChild, nextUrl, [
@@ -225,7 +228,6 @@ const getLocation = (elem)=>elem.ownerDocument.__location;
 const getDefaultLocation = (url)=>new URL("http://localhost" + url);
 const setLocation = (elem, url)=>elem.ownerDocument.__location = globalThis.location ?? getDefaultLocation(url);
 const useLocation = (elem)=>(elem.__location = true) && getLocation(elem);
-const getUpdateFunc = (elem)=>elem?.ownerDocument?.__update;
 const isConsumer = (elem)=>elem.__history || elem.__location || elem.__routeParams || elem.__searchParams;
 const isVisiblePath = (elem)=>!findHtmlAscendant(elem, (elem)=>isRouteElement(elem) && isHiddenHtmlElement(elem));
 const findConsumers = (elem)=>findHtmlDescendants(elem, isConsumer);
