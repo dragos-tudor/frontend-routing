@@ -2,7 +2,10 @@
   "importMap": "./deps.map.json",
   "tasks": {
     "bundle": "deno run --allow-all --no-check ./bundling.js",
-    "run": "deno run --allow-all --no-check",
     "test": "deno test --allow-all --no-check  --parallel"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "/jsx"
   }
 }

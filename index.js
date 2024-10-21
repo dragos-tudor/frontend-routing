@@ -265,11 +265,11 @@ const navigateToRoute = (elem, url)=>{
 };
 const isHtmlRouter = (elem)=>getHtmlName(elem) === "router";
 const setNavigateHandler = (elem, navigate)=>setEventHandler(elem, "onclick", (event)=>event.isNavigate && navigate(event.target, event.target.href));
-const setPopStateHandler = (window1, navigate)=>setEventHandler(window1, "onpopstate", ()=>navigate(findHtmlDescendant(window1.document.body, isHtmlRouter), window1.location.href, true));
+const setPopStateHandler = (window, navigate)=>setEventHandler(window, "onpopstate", ()=>navigate(findHtmlDescendant(window.document.body, isHtmlRouter), window.location.href, true));
 const Router = (props, elem)=>{
     setHistory(elem);
     setNavigateHandler(elem, navigateToRoute);
-    setPopStateHandler(window, navigateToHistoryRoute);
+    setPopStateHandler(globalThis, navigateToHistoryRoute);
     return props.children;
 };
 const Route = (props, elem)=>{

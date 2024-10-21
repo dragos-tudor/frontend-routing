@@ -7,7 +7,7 @@ export const Router = (props, elem) =>
   setHistory(elem)
 
   setNavigateHandler(elem, navigateToRoute)
-  setPopStateHandler(window, navigateToHistoryRoute)
+  setPopStateHandler(globalThis, navigateToHistoryRoute)
 
   return props.children
 }

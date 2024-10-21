@@ -1,8 +1,9 @@
 {
   "imports": {
-    "/asserts.ts": "https://deno.land/std@0.204.0/assert/mod.ts",
-    "/mock.ts": "https://deno.land/std@0.204.0/testing/mock.ts",
-    "/emit.ts": "https://deno.land/x/emit@0.31.2/mod.ts",
-    "/rendering.js": "https://raw.githubusercontent.com/dragos-tudor/frontend-rendering/main/index.js"
+    "/asserts.ts": "jsr:@std/assert@1.0.6",
+    "/mock.ts": "jsr:@std/testing@1.0.3/mock",
+    "/emit.ts": "jsr:@deno/emit@0.45.0",
+    "/rendering.js": "./.libraries/rendering.js",
+    "/jsx/jsx-runtime": "./.libraries/jsx-runtime.js"
   }
 }
