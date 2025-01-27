@@ -29,7 +29,7 @@ const findHtmlAscendants = (elem, func, result = [])=>{
     return findHtmlAscendants(getHtmlParentElement(elem), func, result);
 };
 const findHtmlDescendants = (elem, func, result = [], findStrategy = findBreadthHtmlDescendants)=>findStrategy(getHtmlChildren(elem), func, result);
-const logHtmlElement = ($elem, $parent, message, props, logger)=>logger($elem, message, "elem:", getHtmlName($elem), "props:", props, "parent:", $parent && getHtmlName($parent));
+const logHtmlElement = ($elem, $parent, message, props, logger)=>logger(`${message} elem:`, getHtmlName($elem), "props:", props, "parent:", $parent && getHtmlName($parent), $elem);
 const appendHtmlNode = (node, parent)=>parent.appendChild(node);
 const createHtmlElement = (document, tagName)=>document.createElement(tagName);
 const createHtmlElementNS = (document, ns, tagName)=>document.createElementNS(ns, tagName);
@@ -56,13 +56,15 @@ const insertHtmlNode = (node, oldNode)=>getHtmlParentNode(oldNode).insertBefore(
 const existsHtmlNodeChildren = (node)=>node.childNodes !== 0;
 const HtmlMimeType = "text/html";
 const parseHtml = (html)=>new DOMParser().parseFromString(html, HtmlMimeType).documentElement;
-const DOMLibraryUrl = "npm:linkedom@0.18.5";
-const registerDOMParser = async (url = DOMLibraryUrl, global = globalThis)=>{
-    const dom = await import(url);
-    global.DOMParser = global.DOMParser || dom.DOMParser;
-    global.CustomEvent = dom.CustomEvent;
-    return global.DOMParser;
-};
+const registerDomParser = async (url, global = globalThis)=>Object.assign(global, {
+        ...await import(url)
+    });
+const registerLinkeDomParser = async (url = "npm:linkedom@0.18.5", global = globalThis)=>Object.assign(global, {
+        ...await import(url),
+        Event: global.Event,
+        InputEvent: global.InputEvent,
+        EventTarget: global.EventTarget
+    });
 const isHtmlText = (elem)=>elem.nodeType === 3;
 const getHtmlText = ($elem)=>isHtmlText($elem) && $elem.textContent;
 const createHtmlText = (document, text)=>document.createTextNode(text);
@@ -71,7 +73,7 @@ const insertHtmlText = (text, $elem, $parent)=>{
     const $text = createHtmlText(document, text);
     return insertHtmlNode($text, $elem);
 };
-const logHtmlText = ($text, $parent, message, logger)=>logger($text, message, "text:", getHtmlText($text), "parent:", $parent && getHtmlName($parent));
+const logHtmlText = ($text, $parent, message, logger)=>logger(`${message} text:`, getHtmlText($text), "parent:", $parent && getHtmlName($parent), $text);
 const renderHtmlText = (text, $parent)=>{
     const document = getHtmlOwnerDocument($parent);
     const $text = createHtmlText(document, text);
@@ -136,12 +138,6 @@ const useEffect = (effects, name, func, deps)=>{
     setFuncEffect(effect, func);
     return effect;
 };
-Object.freeze({
-    key: undefined,
-    ref: undefined,
-    __self: undefined,
-    __source: undefined
-});
 const isArrayPropsChildren = (props)=>props.children instanceof Array;
 const getJsxPropsChildren = (props)=>isArrayPropsChildren(props) ? props.children : [
         props.children
@@ -466,10 +462,14 @@ const logElement = ($elem, message)=>logHtmlElement($elem, getHtmlParentElement(
 const logElementOrText = ($elem, message)=>isHtmlText($elem) ? logText($elem, message) : logElement($elem, message);
 const logText = ($elem, message)=>logHtmlText($elem, getHtmlParentElement($elem), message, logInfo);
 const renderElement = (elem, $parent)=>{
-    if (isJsxText(elem)) return renderHtmlText(elem, $parent);
+    if (isJsxText(elem)) {
+        const $text = renderHtmlText(elem, $parent);
+        logText($text, "render");
+        return $text;
+    }
     throwError1(validateHtmlElement($parent));
-    throwError1(validateJsxElement(elem));
     throwError1(validateHtmlTagName(getJsxName(elem)));
+    throwError1(validateJsxElement(elem));
     const props = getJsxProps(elem);
     const $elem = renderHtmlElement(getJsxName(elem), getElementNS(elem, $parent), $parent);
     setHtmlAttrs($elem, props);
@@ -478,7 +478,7 @@ const renderElement = (elem, $parent)=>{
     enableIgnoring($elem, $parent);
     enableLogging($elem, $parent);
     storeJsxElement($elem, elem);
-    logElementOrText($elem, "render");
+    logElement($elem, "render");
     return $elem;
 };
 const dispatchError = (elem, error)=>dispatchEvent(elem, "error", {
@@ -504,12 +504,15 @@ const isRenderedElement = (elem)=>existsHtmlParentElement(elem) && !existsHtmlNo
 const isUpdatedElement = (elem)=>existsHtmlParentElement(elem) && existsHtmlNodeChildren(elem);
 const isUnrenderedElement = (elem)=>!existsHtmlParentElement(elem);
 const isStyleElement = (elem)=>getHtmlName(elem) === "style";
-const isStyleIgnoredOrTextElement = ($elem)=>isStyleElement($elem) || isIgnoredElement($elem) || isHtmlText($elem);
+const shouldSkipChildren = ($elem)=>isStyleElement($elem) || isIgnoredElement($elem) || isHtmlText($elem);
 const renderElementTree = (elem, $parent = parseHtml("<main></main>"))=>{
     const $elems = [
         renderElement(elem, $parent)
     ];
-    for (const $elem of $elems)isStyleIgnoredOrTextElement($elem) || $elems.push(...renderElementChildren($elem));
+    for (const $elem of $elems){
+        if (shouldSkipChildren($elem)) continue;
+        $elems.push(...renderElementChildren($elem));
+    }
     $elems.forEach(($elem)=>runEffects(getEffects($elem)));
     return $elems;
 };
@@ -604,7 +607,7 @@ const updateElementTree = ($elem, elem = getJsxElement($elem))=>{
         updateElement(elem, $elem)
     ];
     for (const $elem of $elems){
-        if (isStyleIgnoredOrTextElement($elem)) continue;
+        if (shouldSkipChildren($elem)) continue;
         if (isRenderedElement($elem)) {
             $elems.push(...renderElementChildren($elem));
             continue;
@@ -625,7 +628,10 @@ const unrenderElementTree = ($elem)=>{
     const $elems = [
         unrenderElement($elem)
     ];
-    for (const $elem of $elems)isStyleIgnoredOrTextElement($elem) || $elems.push(...unrenderElementChildren($elem));
+    for (const $elem of $elems){
+        if (shouldSkipChildren($elem)) continue;
+        $elems.push(...unrenderElementChildren($elem));
+    }
     return $elems;
 };
 const render = (elem, $parent = parseHtml("<main></main>"))=>{
@@ -721,12 +727,7 @@ export { useMemo as useMemo };
 export { getStates as getStates };
 export { setStates as setStates };
 export { useState as useState };
-try {
-    globalThis["DOMParser"] || await registerDOMParser();
-} catch (error) {
-    console.error(error);
-    throw error;
-}
+export { registerDomParser as registerDomParser, registerLinkeDomParser as registerLinkeDomParser };
 export { Context as Context };
 const Lazy = (props, elem)=>{
     throwError(validateHtmlElement(elem));
@@ -750,3 +751,5 @@ export { useContext as useContext };
 export { getServices as getServices };
 export { setServices as setServices };
 export { getService as useService };
+
+await registerLinkeDomParser();

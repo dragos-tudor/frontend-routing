@@ -5,8 +5,10 @@
 
 ### Usage
 ```javascript
-import {render} from "/scripts/rendering.js"
-import {Router, Route, NavLink, navigate} from "/scripts/routing.js"
+import { render, registerLinkeDomParser } from "/scripts/rendering.js"
+import { Router, Route, NavLink, navigate } from "/scripts/routing.js"
+
+await registerLinkeDomParser()
 
 const loadSpecialOffer = async () => {
     const {SpecialOffer} = await import("/components/special-offer.jsx");
