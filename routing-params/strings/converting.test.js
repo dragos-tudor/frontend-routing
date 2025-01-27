@@ -12,7 +12,7 @@ Deno.test("use query and route params => convert to type", async (t) => {
     assertEquals(fromStringType(".42"), 0.42)
     assertEquals(fromStringType("-0.42"), -0.42)
     assertEquals(fromStringType("0"), 0)
-    assertEquals(fromStringType("2020-01-01"), new Date(2020, 0, 1))
+    assertEquals(fromStringType(new Date(2020, 0, 1).toISOString()), new Date(2020, 0, 1))
     assertEquals(fromStringType("2020-13-01"), "2020-13-01")
     assertEquals(fromStringType("true"), true)
     assertEquals(fromStringType("false"), false)
