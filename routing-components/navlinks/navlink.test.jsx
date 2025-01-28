@@ -1,6 +1,8 @@
 import { assertEquals } from "/asserts.ts"
-import { render } from "/rendering.js"
+import { render, registerLinkeDomParser } from "/rendering.js"
 import { NavLink } from "./navlink.jsx"
+
+await registerLinkeDomParser()
 
 Deno.test("navigate app => use navigation links", async (t) => {
 

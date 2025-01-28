@@ -1,7 +1,9 @@
 import { assertEquals } from "/asserts.ts"
-import { render } from "/rendering.js"
+import { registerLinkeDomParser, render } from "/rendering.js"
 import { createRouteData } from "../route-data/creating.js"
 import { renderRouteChild } from "./rendering.js"
+
+await registerLinkeDomParser()
 
 export const A = () => <></>
 

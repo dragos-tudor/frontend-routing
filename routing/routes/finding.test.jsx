@@ -1,8 +1,9 @@
 import { assertEquals as eq } from "/asserts.ts"
-import { render } from "/rendering.js"
+import { registerLinkeDomParser, render } from "/rendering.js"
 import { createRouteData } from "../route-data/creating.js"
 import { findRoute } from "./finding.js"
 
+await registerLinkeDomParser()
 
 Deno.test("use routes => find route", async (t) => {
 

@@ -1,9 +1,11 @@
 import { assertEquals, assertExists } from "/asserts.ts"
-import { render, dispatchEvent } from "/rendering.js"
+import { render, dispatchEvent, registerLinkeDomParser } from "/rendering.js"
 import { getHistory } from "../../routing-locations/mod.js"
 import { useRouteParams } from "../../routing-params/mod.js"
 import { NavLink, Route, Router } from "../../routing-components/mod.js"
 import { navigateToRoute } from "./navigating.js"
+
+await registerLinkeDomParser()
 
 Deno.test("navigate app => navigate to route", async (t) => {
 

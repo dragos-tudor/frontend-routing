@@ -1,11 +1,12 @@
 import { assertEquals, assertExists } from "/asserts.ts"
-import { render } from "/rendering.js"
+import { registerLinkeDomParser, render } from "/rendering.js"
 import { spy, assertSpyCallArgs} from "/mock.ts"
 import { hideHtmlElement, isShownHtmlElement } from "../../routing-html/mod.js"
 import { setRouteParams, getRouteParams, resolveSearchParams, setSearchParams } from "../../routing-params/mod.js"
 import { createRouteData } from "../route-data/creating.js"
 import { changeRoute } from "./changing.js"
 
+await registerLinkeDomParser()
 
 Deno.test("use routes => change routes", async (t) => {
 

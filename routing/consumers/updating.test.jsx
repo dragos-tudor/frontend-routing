@@ -1,9 +1,10 @@
 import { assertEquals } from "/asserts.ts"
-import { render } from "/rendering.js"
+import { registerLinkeDomParser, render } from "/rendering.js"
 import { updateConsumers } from "./updating.js"
 import { useHistory, useLocation } from "../../routing-locations/mod.js"
 import { useSearchParams } from "../../routing-params/mod.js"
 
+await registerLinkeDomParser()
 
 Deno.test("use routes => update routing consumers", async (t) => {
 

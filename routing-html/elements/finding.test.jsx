@@ -1,7 +1,8 @@
 import { assertEquals } from "/asserts.ts"
 import { findHtmlAscendant, findHtmlDescendant, findHtmlDescendants } from "./finding.js"
-import { render } from "/rendering.js"
+import { registerLinkeDomParser, render } from "/rendering.js"
 
+await registerLinkeDomParser()
 
 Deno.test("use html routes => find html elements", async (t) =>
 {

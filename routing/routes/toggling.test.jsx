@@ -1,7 +1,9 @@
 import { assertEquals } from "/asserts.ts"
-import { render } from "/rendering.js"
+import { registerLinkeDomParser, render } from "/rendering.js"
 import { hideHtmlElement, isShownHtmlElement, showHtmlElement } from "../../routing-html/mod.js"
 import { toggleRoutes } from "./toggling.js"
+
+await registerLinkeDomParser()
 
 Deno.test("use routes => toggle routes", async (t) => {
 
