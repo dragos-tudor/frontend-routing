@@ -98,9 +98,7 @@ const setFuncEffect = (effect, func)=>effect.func = func;
 const setInitialFuncEffect = (effect, func)=>effect.initialFunc = func;
 const setInitialEffect = (effects, name, func)=>setInitialFuncEffect(getEffect(effects, name), func);
 const resetEffectFunc = (effect)=>effect.func = undefined;
-const equalPrimitives = (value1, value2)=>value1 === value2;
-const falsy = ()=>false;
-const truthy = ()=>true;
+const equalValues = (value1, value2)=>value1 === value2;
 const ReservedPropNames = Object.freeze([
     "children"
 ]);
@@ -113,15 +111,28 @@ const existsObjects = (obj1, obj2)=>existsObject(obj1) && existsObject(obj2);
 const isObjectType = (value)=>typeof value === "object" && value !== null;
 const equalArraysLength = (arr1, arr2)=>arr1.length === arr2.length;
 const existsArray = (arr)=>arr != null;
-const existsArrays = (arr1, arr2)=>existsArray(arr1) && existsArray(arr2);
+const existArrays = (arr1, arr2)=>existsArray(arr1) && existsArray(arr2);
 const isArrayType = (value)=>value instanceof Array;
 const isFunctionType = (value)=>typeof value === "function";
-const equalArrayItems = (arr1, arr2)=>arr1.every((_, index)=>equalValues(arr1[index], arr2[index]));
-const equalArrays = (arr1, arr2)=>(!existsArrays(arr1, arr2) && equalPrimitives || !equalArraysLength(arr1, arr2) && falsy || equalArrayItems)(arr1, arr2);
-const equalValues = (value1, value2)=>(isFunctionType(value1) && isFunctionType(value2) && truthy || isArrayType(value1) && isArrayType(value2) && equalArrays || isObjectType(value1) && isObjectType(value2) && equalObjects || equalPrimitives)(value1, value2);
-const equalObjectsProp = (obj1, obj2, propName)=>isReservedObjectPropName(propName) || equalValues(obj1[propName], obj2[propName]);
+const equalArrayItems = (arr1, arr2)=>arr1.every((_, index)=>equalData(arr1[index], arr2[index]));
+const equalArrays = (arr1, arr2)=>{
+    if (!existArrays(arr1, arr2)) return equalValues(arr1, arr2);
+    if (!equalArraysLength(arr1, arr2)) return false;
+    return equalArrayItems(arr1, arr2);
+};
+const equalData = (value1, value2)=>{
+    if (isFunctionType(value1) && isFunctionType(value2)) return true;
+    if (isArrayType(value1) && isArrayType(value2)) return equalArrays(value1, value2);
+    if (isObjectType(value1) && isObjectType(value2)) return equalObjects(value1, value2);
+    return equalValues(value1, value2);
+};
+const equalObjectsProp = (obj1, obj2, propName)=>isReservedObjectPropName(propName) || equalData(obj1[propName], obj2[propName]);
 const equalObjectsProps = (obj1, obj2)=>getObjectPropNames(obj1).every((propName)=>equalObjectsProp(obj1, obj2, propName));
-const equalObjects = (obj1, obj2)=>(!existsObjects(obj1, obj2) && equalPrimitives || !equalObjectsPropsLength(obj1, obj2) && falsy || equalObjectsProps)(obj1, obj2);
+const equalObjects = (obj1, obj2)=>{
+    if (!existsObjects(obj1, obj2)) return equalValues(obj1, obj2);
+    if (!equalObjectsPropsLength(obj1, obj2)) return false;
+    return equalObjectsProps(obj1, obj2);
+};
 const createEffect = (name, func, deps)=>({
         name,
         func,
@@ -646,7 +657,7 @@ export { render as render };
 const updateConsumerContext = (name, value, elem)=>{
     const contexts = getContexts(elem);
     const context = getContext(contexts, name);
-    if (equalValues(context.value, value)) return;
+    if (equalData(context.value, value)) return;
     setContextValue(context, value);
     return updateElementTree(elem);
 };
