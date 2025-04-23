@@ -2,7 +2,7 @@
   "importMap": "./deps.map.json",
   "tasks": {
     "bundle": "deno run --allow-all --no-check ./bundling.js",
-    "test": "deno test --allow-all --no-check  --parallel  \"$INIT_CWD\""
+    "test": "cd \"$INIT_CWD\" && deno test --allow-all --no-check  --parallel"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
